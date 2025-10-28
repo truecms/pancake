@@ -1,14 +1,15 @@
 {
 	"name": "pancake",
 	"private": true,
+	"packageManager": "pnpm@8.15.9",
 	"scripts": {
 		"test:watch": "jest --watch --coverage",
 		"test:unit-test": "jest",
 		"test:end-to-end": "node tests/tester.js",
-		"test": "yarn test:end-to-end && yarn test:unit-test",
-		"watch": "onchange packages/*/src/ -- yarn build",
+		"test": "pnpm run test:end-to-end && pnpm run test:unit-test",
+		"watch": "onchange packages/*/src/ -- pnpm run build",
 		"purge": "rimraf packages/*/node_modules | rimraf packages/*/dist | rimraf packages/*/lib | rimraf node_modules",
-		"build": "yarn workspaces run build"
+		"build": "pnpm -r run build"
 	},
 	"engines": {
 		"node": ">=10",

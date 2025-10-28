@@ -44,7 +44,8 @@ If you have issues with using SASS globals in a ReactJS project, please check ou
 
 ## Requirements
 
-- npm version >= `~3.0.0`
+- Node.js 22.x (use `.nvmrc` with `nvm use`)
+- Corepack enabled to manage pnpm (`corepack enable`)
 - A `package.json` file in your root (run `npm init --yes`)
 
 _Pancake alone does not come with any dependencies while all plugins have fixed dependencies to specific versions to keep the security impact as low as possible. We also ship a `package-lock.json` file._
