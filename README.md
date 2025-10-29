@@ -46,6 +46,7 @@ If you have issues with using SASS globals in a ReactJS project, please check ou
 
 - Node.js 22.x (use `.nvmrc` with `nvm use`)
 - Corepack enabled to manage pnpm (`corepack enable`)
+- pnpm 8.x (Corepack will install `pnpm@8.15.x` defined in `package.json`)
 - A `package.json` file in your root (run `npm init --yes`)
 
 _Pancake alone does not come with any dependencies while all plugins have fixed dependencies to specific versions to keep the security impact as low as possible. We also ship a `package-lock.json` file._
@@ -387,21 +388,25 @@ project. To make your contribution count, have a read through the code first and
 git clone -c core.symlinks=true https://github.com/govau/pancake
 ```
 
-To run this project you'll need to have [Yarn](https://yarnpkg.com) installed.
+To run this project make sure you are on Node.js 22 (the root `.nvmrc` declares the version) and enable Corepack once per machine. Then install dependencies with pnpm:
 
 ```shell
-yarn install
+nvm use
+corepack enable
+pnpm install --frozen-lockfile
 ```
 
+Build all packages:
+
 ```shell
-yarn build
+pnpm run build
 ```
 
 To develop in one of the modules run the watch inside of it:
 
 ```shell
 cd packages/pancake/
-yarn watch
+pnpm run watch
 ```
 
 ❗️ Make sure you only edit file inside the `src/` folder. Files inside the `bin/` folder are overwritten by the transpiler.
@@ -416,6 +421,16 @@ _Please look at the coding style and work with it, not against it. 🌴_
 
 
 ## Taste / Tests
+
+### Install check
+
+Use the deterministic install gate to verify Pancake can bootstrap, build, and package across the workspace:
+
+```shell
+pnpm run install:check
+```
+
+The script requires Node.js 22 and Corepack-enabled pnpm. It will exit with a non-zero status if `pnpm install --frozen-lockfile`, `pnpm run build`, or `pnpm pack` fail for any package.
 
 ### Test modules
 

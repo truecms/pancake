@@ -28,6 +28,7 @@ const { Log, Style, Loading } = require( './logging' );
 const { ParseArgs } = require( './parse-arguments' );
 const { CheckModules } = require( './conflicts' );
 const { Settings } = require( './settings' );
+const { ResolveLockfile } = require( './pancake' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -162,6 +163,14 @@ module.exports.init = ( argv = process.argv ) => {
 // Finding the current working directory
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 	const pkgPath = Cwd( ARGS.cwd );
+	const lockInfo = ResolveLockfile( pkgPath );
+
+	if( lockInfo ) {
+		Log.verbose(`Detected lockfile ${ Style.yellow( lockInfo.filename ) } for ${ Style.yellow( lockInfo.manager ) } in ${ Style.yellow( pkgPath ) }`);
+	}
+	else {
+		Log.verbose(`No lockfile detected in ${ Style.yellow( pkgPath ) }`);
+	}
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -248,7 +257,7 @@ module.exports.init = ( argv = process.argv ) => {
 						}
 					});
 
-					installed.push( InstallPlugins( plugins, pkgPath ) ); //add the promise to the installed array
+					installed.push( InstallPlugins( plugins, pkgPath, lockInfo ) ); //add the promise to the installed array
 				}
 
 				Promise.all( installed ) //if we had plugins installed, wait until they are finished

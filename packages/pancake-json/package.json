@@ -2,6 +2,7 @@
 	"name": "@gov.au/pancake-json",
 	"version": "1.2.0",
 	"description": "A Pancake plugin to generate a json file from all pancake modules.",
+	"packageManager": "pnpm@8.15.9",
 	"keywords": [
 		"npm",
 		"flat",
@@ -16,16 +17,17 @@
 		"json"
 	],
 	"engines": {
-		"npm": ">=6.0.0"
+		"node": ">=22",
+		"npm": ">=10"
 	},
 	"main": "./lib/pancake.js",
 	"scripts": {
-		"prepublish": "npm run build && npm run test",
+		"prepublish": "pnpm run build && pnpm run test",
 		"test": "exit 0",
-		"build": "npm run build:js",
-		"build:watch": "npm run build:js && jest --coverage",
-		"build:js": "babel src --out-dir lib",
-		"watch": "npm run build:watch && onchange 'src/*.js' '__tests__/*.js' -- npm run build:watch"
+		"build": "pnpm run build:js",
+		"build:watch": "pnpm run build:js && pnpm exec jest --coverage",
+		"build:js": "pnpm exec babel src --out-dir lib",
+		"watch": "pnpm run build:watch && pnpm exec onchange 'src/*.js' '__tests__/*.js' -- pnpm run build:watch"
 	},
 	"jest": {
 		"testEnvironment": "node",

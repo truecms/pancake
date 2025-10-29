@@ -22,7 +22,7 @@ const Fs = require( 'fs' );
 // Included modules
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const { Log, Style, Loading } = require( './logging' );
-const { Spawning } = require( './helpers' );
+const { RecommendInstallCommand } = require( './pancake' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -36,13 +36,11 @@ const { Spawning } = require( './helpers' );
  *
  * @return {promise object}  - Return an object listing plugins installed and plugins found
  */
-module.exports.InstallPlugins = ( plugins, cwd ) => {
+module.exports.InstallPlugins = ( plugins, cwd, lockInfo = null ) => {
 	const result = {
 		found: [],
 		installing: [],
 	};
-
-	const output = false; //switch output of child process to stdout
 
 	return new Promise( ( resolve, reject ) => {
 
@@ -67,87 +65,30 @@ module.exports.InstallPlugins = ( plugins, cwd ) => {
 
 
 		if( result.installing.length > 0 ) {
-			Log.info(`INSTALLING ${ result.installing.join(', ') }`);
+			Loading.stop();
 
-			//get the config so we can return them to what they were
-			const cacheLockStale = Spawning.sync( 'npm', [ 'config', 'get', 'cache-lock-stale' ] ).stdout.toString().trim();
-			const cacheLockWait = Spawning.sync( 'npm', [ 'config', 'get', 'cache-lock-wait' ] ).stdout.toString().trim();
+			const suggestion = RecommendInstallCommand( lockInfo, result.installing );
+			let message = `Missing Pancake plugins: ${ Style.yellow( result.installing.join(', ') ) }`;
 
-			Log.verbose(`npm config was cache-lock-stale: ${ Style.yellow( cacheLockStale ) } cache-lock-wait: ${ Style.yellow( cacheLockWait ) }`);
-
-			//setting new config for just this install to not wait too long for the lockfiles
-			Spawning.sync( 'npm', [ 'config', 'set', 'cache-lock-stale', '10' ] );
-			Spawning.sync( 'npm', [ 'config', 'set', 'cache-lock-wait', '10' ] );
-
-			//checking if we got yarn installed
-			// const command = Spawning.sync( 'yarn', [ '--version' ] );
-			// const hasYarn = command.stdout && command.stdout.toString().trim() ? true : false;
-			const hasYarn = false; //disabled yarn as it has some issues
-
-			if( !output ) {
-				Loading.start(); //waiting with loading to after the blocking child processes
-			}
-
-			Log.verbose(`Yarn ${ Style.yellow( hasYarn ? 'was' : 'was not' ) } detected`);
-
-			let installing; //for spawning our install process
-
-			if( output ) {
-				Loading.stop();
-				Log.space();
-			}
-
-			//options for our child process
-			let spawnOpt = { cwd: cwd };
-			if( output ) {
-				spawnOpt = { cwd: cwd, stdio: 'inherit' };
-			}
-
-			//installing modules
-			if( hasYarn ) {
-				Spawning.async( 'yarn', [ 'add', ...result.installing ], spawnOpt )
-					.catch( error => {
-						Loading.stop();
-
-						//return npm config to what it was before
-						Spawning.sync( 'npm', [ 'config', 'set', 'cache-lock-stale', cacheLockStale ] );
-						Spawning.sync( 'npm', [ 'config', 'set', 'cache-lock-wait', cacheLockWait ] );
-
-						Log.error(`Installing plugins failed`);
-						reject( error );
-					})
-					.then( data => {
-						//return npm config to what it was before
-						Spawning.sync( 'npm', [ 'config', 'set', 'cache-lock-stale', cacheLockStale ] );
-						Spawning.sync( 'npm', [ 'config', 'set', 'cache-lock-wait', cacheLockWait ] );
-
-						resolve( result );
-				});
+			if( lockInfo ) {
+				message += `\nDetected lockfile ${ Style.yellow( lockInfo.filename ) } managed by ${ Style.yellow( lockInfo.manager ) }.`;
 			}
 			else {
-				Spawning.async( 'npm', [ 'install', '--no-progress', '--save', ...result.installing ], spawnOpt )
-					.catch( error => {
-						Loading.stop();
-
-						//return npm config to what it was before
-						Spawning.sync( 'npm', [ 'config', 'set', 'cache-lock-stale', cacheLockStale ] );
-						Spawning.sync( 'npm', [ 'config', 'set', 'cache-lock-wait', cacheLockWait ] );
-
-						Log.error(`Installing plugins failed`);
-						reject( error );
-					})
-					.then( data => {
-						if( output ) {
-							Log.space();
-						}
-
-						//return npm config to what it was before
-						Spawning.sync( 'npm', [ 'config', 'set', 'cache-lock-stale', cacheLockStale ] );
-						Spawning.sync( 'npm', [ 'config', 'set', 'cache-lock-wait', cacheLockWait ] );
-
-						resolve( result );
-				});
+				message += `\nNo lockfile detected; unable to determine package manager automatically.`;
 			}
+
+			message += `\nInstall the missing plugins before running Pancake again.`;
+
+			if( suggestion ) {
+				message += `\nSuggested command: ${ Style.yellow( suggestion ) }`;
+			}
+
+			const error = new Error( message );
+			error.code = 'PANCAKE_MISSING_PLUGINS';
+			error.missingPlugins = result.installing;
+			error.lockfile = lockInfo;
+
+			reject( error );
 		}
 		else {
 			resolve( result );

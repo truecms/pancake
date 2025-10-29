@@ -3,17 +3,18 @@
 	"private": true,
 	"packageManager": "pnpm@8.15.9",
 	"scripts": {
-		"test:watch": "jest --watch --coverage",
-		"test:unit-test": "jest",
+		"test:watch": "pnpm exec jest --watch --coverage",
+		"test:unit-test": "pnpm exec jest",
 		"test:end-to-end": "node tests/tester.js",
 		"test": "pnpm run test:end-to-end && pnpm run test:unit-test",
-		"watch": "onchange packages/*/src/ -- pnpm run build",
-		"purge": "rimraf packages/*/node_modules | rimraf packages/*/dist | rimraf packages/*/lib | rimraf node_modules",
-		"build": "pnpm -r run build"
+		"watch": "pnpm exec onchange packages/*/src/ -- pnpm run build",
+		"purge": "pnpm exec rimraf packages/*/node_modules && pnpm exec rimraf packages/*/dist && pnpm exec rimraf packages/*/lib && pnpm exec rimraf node_modules",
+		"build": "pnpm -r run build",
+		"install:check": "node scripts/install-check.mjs"
 	},
 	"engines": {
-		"node": ">=10",
-		"npm": ">=6"
+		"node": ">=22",
+		"npm": ">=10"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.3.4",
