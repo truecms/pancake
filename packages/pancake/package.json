@@ -1,6 +1,6 @@
 {
 	"name": "@truecms/pancake",
-	"version": "1.4.1",
+	"version": "2.0.0",
 	"description": "Pancake is an utility to make working with npm modules for the frontend sweet and seamlessly.",
 	"packageManager": "pnpm@8.15.9",
 	"keywords": [
@@ -28,6 +28,7 @@
 		"build": "pnpm run build:js",
 		"build:watch": "pnpm run build:js && pnpm exec jest --coverage",
 		"build:js": "pnpm exec babel src --out-dir dist",
+		"test": "pnpm -w run test:unit-test",
 		"watch": "pnpm run build:watch && pnpm exec onchange 'src/*.js' '__tests__/*.js' -- pnpm run build:watch"
 	},
 	"jest": {

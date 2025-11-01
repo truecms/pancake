@@ -1,6 +1,6 @@
 {
 	"name": "@truecms/pancake-sass",
-	"version": "2.3.7",
+	"version": "3.0.0",
 	"description": "A Pancake plugin to compile sass files.",
 	"packageManager": "pnpm@8.15.9",
 	"keywords": [
@@ -25,6 +25,7 @@
 		"build": "pnpm run build:js",
 		"build:watch": "pnpm run build:js && pnpm exec jest --coverage",
 		"build:js": "pnpm exec babel src --out-dir lib",
+		"test": "pnpm -w run test:unit-test",
 		"watch": "pnpm run build:watch && pnpm exec onchange 'src/*.js' '__tests__/*.js' -- pnpm run build:watch"
 	},
 	"jest": {
@@ -46,7 +47,7 @@
 		"lib/*"
 	],
 	"dependencies": {
-		"@truecms/pancake": "~1",
+		"@truecms/pancake": "~2.0.0",
 		"autoprefixer": "10.4.21",
 		"browserslist": "^4.24.0",
 		"postcss": "8.5.6",

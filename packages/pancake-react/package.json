@@ -1,6 +1,6 @@
 {
 	"name": "@truecms/pancake-react",
-	"version": "1.3.0",
+	"version": "2.0.0",
 	"description": "A Pancake plugin to move react files.",
 	"packageManager": "pnpm@8.15.9",
 	"keywords": [
@@ -26,6 +26,7 @@
 		"build": "pnpm run build:js",
 		"build:watch": "pnpm run build:js && pnpm exec jest --coverage",
 		"build:js": "pnpm exec babel src --out-dir lib",
+		"test": "pnpm -w run test:unit-test",
 		"watch": "pnpm run build:watch && pnpm exec onchange 'src/*.js' '__tests__/*.js' -- pnpm run build:watch"
 	},
 	"jest": {
@@ -47,7 +48,7 @@
 		"lib/*"
 	],
 	"dependencies": {
-		"@truecms/pancake": "~1"
+		"@truecms/pancake": "~2.0.0"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.2.3",

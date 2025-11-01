@@ -1,6 +1,6 @@
 {
 	"name": "@truecms/syrup",
-	"version": "1.2.0",
+	"version": "2.0.0",
 	"description": "Syrup helps you select the right pancake modules.",
 	"packageManager": "pnpm@8.15.9",
 	"keywords": [
@@ -28,6 +28,7 @@
 		"build": "pnpm run build:js",
 		"build:watch": "pnpm run build:js && pnpm exec jest --coverage",
 		"build:js": "pnpm exec babel src --out-dir dist",
+		"test": "pnpm -w run test:unit-test",
 		"watch": "pnpm run build:watch && pnpm exec onchange 'src/*.js' '__tests__/*.js' -- pnpm run build:watch"
 	},
 	"jest": {
@@ -51,7 +52,7 @@
 		"settings.json"
 	],
 	"dependencies": {
-		"@truecms/pancake": "~1",
+		"@truecms/pancake": "~2.0.0",
 		"inquirer": "6.2.2",
 		"request": "^2.88.0",
 		"strip-ansi": "5.1.0"
