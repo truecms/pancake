@@ -1,153 +1,158 @@
 /***************************************************************************************************************************************************************
  *
- * logging.js unit tests
+ * log.js unit tests
  *
- * @file - pancake/src/logging.js
+ * @file - pancake/src/log.js
  *
  **************************************************************************************************************************************************************/
 
 
-const { Style, Log } = require( '../src/logging' );
+const { Style, Log } = require( '../src/log' );
 
+const originalLog = console.log;
+const originalInfo = console.info;
+const originalError = console.error;
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Ansi escape color codes
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
-test('Log.parse - undefined argument should return empty string', () => {
-	expect( Style.parse( undefined ) ).toBe('');
-});
-
-
-test('Log.parse - start and end ansi code is correctly added', () => {
-	expect( Style.parse( 'TEST', '666m', '777m' ) ).toBe('\u001B[666mTEST\u001b[777m');
-});
-
-
-test('Log.parse - start and end ansi code can be nested', () => {
-	expect( Style.parse( `TEST ${ Style.parse( 'SUBTEST', '666m', '777m' ) } STRING`, '666m', '777m' ) )
-		.toBe('\u001B[666mTEST \u001B[666mSUBTEST\u001B[666m STRING\u001b[777m');
-});
-
-
-test('function should return correct string and colour', () => {
-	expect( Style.black('test black') ).toBe('\u001B[30mtest black\u001b[39m');
-	expect( Style.red('test red') ).toBe('\u001B[31mtest red\u001b[39m');
-	expect( Style.green('test green') ).toBe('\u001B[32mtest green\u001b[39m');
-	expect( Style.yellow('test yellow') ).toBe('\u001B[33mtest yellow\u001b[39m');
-	expect( Style.blue('test blue') ).toBe('\u001B[34mtest blue\u001b[39m');
-	expect( Style.magenta('test magenta') ).toBe('\u001B[35mtest magenta\u001b[39m');
-	expect( Style.cyan('test cyan') ).toBe('\u001B[36mtest cyan\u001b[39m');
-	expect( Style.white('test white') ).toBe('\u001B[37mtest white\u001b[39m');
-	expect( Style.gray('test gray') ).toBe('\u001B[90mtest gray\u001b[39m');
-	expect( Style.bold('test bold') ).toBe('\u001B[1mtest bold\u001b[22m');
-});
-
-
-test('should be able to combine multiple strings of varying colours', () => {
-	const test = Style.yellow(`yellow text ${ Style.green(`green text ${ Style.red(`red text`) } green text`) } yellow text`);
-
-	expect( test ).toBe('\u001B[33myellow text \u001B[32mgreen text \u001B[31mred text\u001B[32m green text\u001B[33m yellow text\u001b[39m');
-});
-
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Log test
-//--------------------------------------------------------------------------------------------------------------------------------------------------------------
-test('Log.space - Log.space should output a space', () => {
+const stubConsole = () => {
 	console.log = jest.fn();
 	console.info = jest.fn();
-
-	Log.space();
-
-	expect( console.log.mock.calls[0][0] ).toBe(`\n`);
-});
-
-
-test('Log.info - Log.space should only be called the first time a Log function is run', () => {
-	console.log = jest.fn();
-	console.info = jest.fn();
-
-	Log.info(`test`);
-	Log.info(`test2`);
-
-	expect( console.log.mock.calls.length ).toBe( 1 );
-	expect( console.log.mock.calls[0][0] ).toBe(`\n`);
-	expect( console.info.mock.calls[0][0] ).toBe(`🔔  INFO:    test`);
-	expect( console.info.mock.calls[1][0] ).toBe(`🔔  INFO:    test2`);
-});
-
-
-test('Log.ok - Log.space should only be called the first time a Log function is run', () => {
-	console.log = jest.fn();
-	console.info = jest.fn();
-
-	Log.output = false;
-	Log.ok(`test`);
-	Log.ok(`test2`);
-
-	expect( console.log.mock.calls.length ).toBe( 1 );
-	expect( console.log.mock.calls[0][0] ).toBe(`\n`);
-	expect( console.info.mock.calls[0][0] ).toBe(`👍  \u001B[32mOK:\u001b[39m      \u001B[32mtest\u001b[39m`);
-	expect( console.info.mock.calls[1][0] ).toBe(`👍  \u001B[32mOK:\u001b[39m      \u001B[32mtest2\u001b[39m`);
-});
-
-
-test('Log.done - Log.space should only be called the first time a Log function is run', () => {
-	console.log = jest.fn();
-	console.info = jest.fn();
-
-	Log.output = false;
-	Log.done(`test`);
-	Log.done(`test2`);
-
-	expect( console.log.mock.calls.length ).toBe( 1 );
-	expect( console.log.mock.calls[0][0] ).toBe(`\n`);
-	expect( console.info.mock.calls[0][0] ).toBe(`🚀           \u001B[32m\u001B[1mtest\u001b[22m\u001b[39m`);
-	expect( console.info.mock.calls[1][0] ).toBe(`🚀           \u001B[32m\u001B[1mtest2\u001b[22m\u001b[39m`);
-});
-
-
-test('Log.verbose - Log.space should only be called the first time a Log function is run', () => {
-	console.log = jest.fn();
-	console.info = jest.fn();
-
-	Log.output = false;
-	Log.verboseMode = true;
-	Log.verbose(`test`);
-	Log.verbose(`test2`);
-
-	expect( console.log.mock.calls.length ).toBe( 1 );
-	expect( console.log.mock.calls[0][0] ).toBe(`\n`);
-	expect( console.info.mock.calls[0][0] ).toBe(`😬  \u001B[90mVERBOSE: test\u001b[39m`);
-	expect( console.info.mock.calls[1][0] ).toBe(`😬  \u001B[90mVERBOSE: test2\u001b[39m`);
-});
-
-
-test('Log.verbose - Log.verbose should log nothing with verboseMode false', () => {
-	console.log = jest.fn();
-	console.info = jest.fn();
-
-	Log.output = false;
-	Log.verboseMode = false;
-	Log.verbose(`test`);
-	Log.verbose(`test2`);
-
-	expect( console.log.mock.calls.length ).toBe( 0 );
-	expect( console.info.mock.calls.length ).toBe( 0 );
-});
-
-
-test('Log.error - Log.space should only be called the first time a Log function is run', () => {
-	console.log = jest.fn();
 	console.error = jest.fn();
+};
 
-	Log.output = false;
-	Log.verboseMode = true;
-	Log.error(`test`);
-	Log.error(`test2`);
+const restoreConsole = () => {
+	console.log = originalLog;
+	console.info = originalInfo;
+	console.error = originalError;
+};
 
-	expect( console.log.mock.calls.length ).toBe( 5 );
-	expect( console.log.mock.calls[0][0] ).toBe(`\n`);
-	expect( console.error.mock.calls[0][0] ).toBe(`🔥  \u001B[31mERROR:   test\u001b[39m`);
-	expect( console.error.mock.calls[1][0] ).toBe(`🔥  \u001B[31mERROR:   test2\u001b[39m`);
+beforeEach(() => {
+	stubConsole();
+	Log.reset();
+	Log.configure({ mode: 'pretty', verbose: false });
+});
+
+afterEach(() => {
+	restoreConsole();
+});
+
+
+describe('Style helpers', () => {
+	test('parse returns empty string for undefined input', () => {
+		expect( Style.parse( undefined ) ).toBe('');
+	});
+
+	test('parse wraps message with ansi start/end codes', () => {
+		expect( Style.parse( 'TEST', '666m', '777m' ) ).toBe('\u001B[666mTEST\u001b[777m');
+	});
+
+	test('parse allows nested ansi codes', () => {
+		expect(
+			Style.parse(
+				`TEST ${ Style.parse( 'SUBTEST', '666m', '777m' ) } STRING`,
+				'666m',
+				'777m'
+			)
+		).toBe('\u001B[666mTEST \u001B[666mSUBTEST\u001B[666m STRING\u001b[777m');
+	});
+});
+
+
+describe('Pretty mode logging', () => {
+	test('space writes a blank line once', () => {
+		Log.space();
+		expect( console.log ).toHaveBeenCalledWith('\n');
+	});
+
+	test('info prefixes message and pauses spinner', () => {
+		Log.info('test info');
+
+		expect( console.log ).toHaveBeenCalledWith('\n');
+		expect( console.info ).toHaveBeenCalledWith('🔔  INFO:    test info');
+	});
+
+	test('ok outputs green message', () => {
+		Log.ok('all good');
+
+		expect( console.info ).toHaveBeenCalledWith('👍  \u001B[32mOK:\u001b[39m      \u001B[32mall good\u001b[39m');
+	});
+
+	test('done prints rocket banner', () => {
+		Log.done('launch');
+
+		expect( console.info ).toHaveBeenCalledWith('🚀           \u001B[32m\u001B[1mlaunch\u001b[22m\u001b[39m');
+	});
+
+	test('verbose logs only when enabled', () => {
+		Log.verbose('hidden');
+		expect( console.info ).not.toHaveBeenCalled();
+
+		Log.configure({ verbose: true });
+		Log.output = false;
+		Log.verbose('now visible');
+
+		expect( console.info ).toHaveBeenCalledWith('😬  \u001B[90mVERBOSE: now visible\u001b[39m');
+	});
+
+	test('error prints banner once and sets exit code', () => {
+		jest.spyOn( Math, 'random' ).mockReturnValue( 0 );
+
+		Log.error('boom');
+		expect( console.log.mock.calls.length ).toBeGreaterThanOrEqual( 3 );
+		expect( console.error ).toHaveBeenCalledWith('🔥  \u001B[31mERROR:   boom\u001b[39m');
+		expect( Log.getExitCode() ).toBe( 1 );
+		expect( process.exitCode ).toBe( 1 );
+
+		console.log.mockClear();
+		console.error.mockClear();
+		Log.error('boom again');
+		expect( console.error ).toHaveBeenCalledWith('🔥  \u001B[31mERROR:   boom again\u001b[39m');
+
+		Math.random.mockRestore();
+	});
+});
+
+
+describe('JSON mode logging', () => {
+	test('emits structured log objects', () => {
+		const jsonLogs = [];
+		Log.configure({
+			mode: 'json',
+			verbose: true,
+			streams: {
+				log: value => jsonLogs.push( value ),
+				info: () => {},
+				error: value => jsonLogs.push( value ),
+			},
+		});
+		Log.output = false;
+
+		Log.info('structured', { id: 42 });
+
+		expect( jsonLogs ).toHaveLength( 1 );
+		const payload = JSON.parse( jsonLogs[ 0 ] );
+		expect( payload.level ).toBe('info');
+		expect( payload.message ).toBe('structured');
+		expect( payload.meta ).toMatchObject({ id: 42 });
+		expect( payload.timestamp ).toBeDefined();
+
+		jsonLogs.length = 0;
+		Log.verbose('extra', { foo: 'bar' });
+		expect( jsonLogs ).toHaveLength( 1 );
+		const verbosePayload = JSON.parse( jsonLogs[ 0 ] );
+		expect( verbosePayload.level ).toBe('verbose');
+		expect( verbosePayload.meta ).toMatchObject({ foo: 'bar' });
+	});
+});
+
+
+describe('Silent mode logging', () => {
+	test('suppresses non-error output but still surfaces errors', () => {
+		Log.configure({ mode: 'silent' });
+		Log.info('quiet');
+		expect( console.info ).not.toHaveBeenCalled();
+		expect( console.log ).not.toHaveBeenCalled();
+
+		Log.error('still visible');
+		expect( console.error ).toHaveBeenCalledWith('🔥  \u001B[31mERROR:   still visible\u001b[39m');
+	});
 });

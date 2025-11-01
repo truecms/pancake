@@ -24,7 +24,7 @@ const Path = require( 'path' );
 const { ExitHandler, CheckNPM, Cwd, Size } = require( './helpers' );
 const { InstallPlugins, RunPlugins } = require( './plugins' );
 const { GetModules, GetPlugins } = require( './modules' );
-const { Log, Style, Loading } = require( './logging' );
+const { Log, Style, Loading } = require( './log' );
 const { ParseArgs } = require( './parse-arguments' );
 const { CheckModules } = require( './conflicts' );
 const { Settings } = require( './settings' );
@@ -43,12 +43,15 @@ module.exports.init = ( argv = process.argv ) => {
 	const pkg = require( Path.normalize(`${ __dirname }/../package.json`) );
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Verbose flag
+// Configure logging mode before parsing arguments
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-	let verbose = false;
-	if( process.argv.indexOf('-v') !== -1 || process.argv.indexOf('--verbose') !== -1 ) {
-		Log.verboseMode = true;
-	}
+	const rawArgs = Array.isArray( argv ) ? argv : process.argv;
+	const hasVerboseFlag = rawArgs.indexOf('-v') !== -1 || rawArgs.indexOf('--verbose') !== -1;
+	const hasJsonFlag = rawArgs.indexOf('-j') !== -1 || rawArgs.indexOf('--json') !== -1;
+	const hasSilentFlag = rawArgs.indexOf('-q') !== -1 || rawArgs.indexOf('--silent') !== -1;
+	const initialMode = hasSilentFlag ? 'silent' : ( hasJsonFlag ? 'json' : 'pretty' );
+
+	Log.configure({ mode: initialMode, verbose: hasVerboseFlag });
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -74,6 +77,10 @@ module.exports.init = ( argv = process.argv ) => {
 // Parsing cli arguments
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 	const ARGS = ParseArgs( SETTINGS, argv );
+	Log.configure({
+		mode: ARGS.silent ? 'silent' : ( ARGS.json ? 'json' : 'pretty' ),
+		verbose: ARGS.verbose,
+	});
 
 	//arg overwrites
 	SETTINGS.npmOrg = ARGS.org;
@@ -150,6 +157,10 @@ module.exports.init = ( argv = process.argv ) => {
 			`    $ ${ Style.yellow(`pancake --help`) }\n\n` +
 			`  ${ Style.bold(`VERSION`) }         - Display the version of pancake.\n` +
 			`    $ ${ Style.yellow(`pancake --version`) }\n\n` +
+			`  ${ Style.bold(`JSON LOGS`) }       - Emit structured JSON logging suitable for CI pipelines.\n` +
+			`    $ ${ Style.yellow(`pancake --json`) }\n\n` +
+			`  ${ Style.bold(`SILENT`) }          - Suppress all non-error output while keeping exit codes accurate.\n` +
+			`    $ ${ Style.yellow(`pancake --silent`) }\n\n` +
 			`  ${ Style.bold(`VERBOSE`) }         - Run pancake in verbose silly mode\n` +
 			`    $ ${ Style.yellow(`pancake --verbose`) }`
 		);

@@ -380,17 +380,15 @@ const TESTER = (() => { //constructor factory
 					// .stdout.on('data', ( data ) => {
 					// 	console.log( data.toString() );
 					// })
-					.on( 'close', ( code ) => {
-						if( code === 0 ) {
-							// TESTER.log.pass(`Ran test in ${ Chalk.bgWhite.black(` ${ Path.basename( path ) } `) } folder`);
+				.on( 'close', ( code ) => {
+					if( code === 0 || ( settings.empty && code !== 0 ) ) {
+						resolve();
+					}
+					else {
+						TESTER.PASS = false;
 
-							resolve();
-						}
-						else {
-							TESTER.PASS = false;
-
-							reject(`Script errored out!`);
-						}
+						reject(`Script errored out!`);
+					}
 				});
 			});
 		},

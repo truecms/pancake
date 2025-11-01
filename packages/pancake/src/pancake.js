@@ -26,7 +26,7 @@ const Fs = require( 'fs' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const { GetFolders, CreateDir, WriteFile, ReadFile, CopyFile } = require('./files' );
 const { ExitHandler, CheckNPM, Cwd, Size, Spawning } = require('./helpers' );
-const { Log, Style, Loading } = require('./logging' );
+const { Log, Style, Loading } = require('./log' );
 const { ParseArgs } = require('./parse-arguments' );
 const { CheckModules } = require( './conflicts' );
 const { GetModules } = require( './modules' );

@@ -11,128 +11,104 @@ const { ParseArgs } = require( '../src/parse-arguments' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-// ParseArgs function
+// Shared fixtures
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-/**
- * Test for running a single command
- */
 const settings = {
 	'npmOrg': '@gov.au @nsw.gov.au',
 	'plugins': true,
 	'ignorePlugins': [],
 };
 
-const argsSingleCommand = [
-	'node',
-	'pancake',
-	'--help',
-];
-
-const resultSingleComand = {
+const baseExpectation = {
 	cwd: undefined,
 	version: false,
 	verbose: false,
 	nosave: false,
 	set: [],
 	org: settings.npmOrg,
+	json: false,
+	silent: false,
 	plugins: true,
 	ignorePlugins: [],
-	help: true,
+	help: false,
 };
 
-test('Parse args should return correct object for a single command', () => {
-	expect( ParseArgs( settings, argsSingleCommand ) ).toMatchObject( resultSingleComand );
-});
 
+describe('ParseArgs', () => {
+	test('single flag toggles help', () => {
+		const args = ['node', 'pancake', '--help'];
+		expect( ParseArgs( settings, args ) ).toEqual({
+			...baseExpectation,
+			help: true,
+		});
+	});
 
-/**
- * Test for running two commands
- */
-const argsTwoCommands = [
-	'node',
-	'pancake',
-	'--help',
-	'--noplugins',
-];
+	test('multiple flags toggle plugins off', () => {
+		const args = ['node', 'pancake', '--help', '--noplugins'];
+		expect( ParseArgs( settings, args ) ).toEqual({
+			...baseExpectation,
+			help: true,
+			plugins: false,
+		});
+	});
 
-const resultTwoComands = {
-	cwd: undefined,
-	version: false,
-	verbose: false,
-	nosave: false,
-	set: [],
-	org: settings.npmOrg,
-	plugins: false,
-	ignorePlugins: [],
-	help: true,
-};
+	test('all long-form flags including json logging', () => {
+		const args = [
+			'node',
+			'pancake',
+			'path/file',
+			'--set', 'npmOrg', '@yourOrg',
+			'--verbose',
+			'--version',
+			'--nosave',
+			'--noplugins',
+			'--ignore', '@gov.au/pancake-js,@gov.au/pancake-sass',
+			'--json',
+			'--help',
+		];
 
-test('Parse args should return correct object for a single command', () => {
-	expect( ParseArgs( settings, argsTwoCommands ) ).toMatchObject( resultTwoComands );
-});
+		expect( ParseArgs( settings, args ) ).toEqual({
+			...baseExpectation,
+			cwd: 'path/file',
+			set: ['npmOrg', '@yourOrg'],
+			verbose: true,
+			version: true,
+			nosave: true,
+			plugins: false,
+			ignorePlugins: ['@gov.au/pancake-js', '@gov.au/pancake-sass'],
+			help: true,
+			json: true,
+		});
+	});
 
+	test('short-form flags include silent and json', () => {
+		const args = [
+			'node',
+			'pancake',
+			'path/file',
+			'-s', 'npmOrg', '@yourOrg',
+			'-v',
+			'-V',
+			'-n',
+			'-p',
+			'-i', '@gov.au/pancake-js,@gov.au/pancake-sass',
+			'-j',
+			'-q',
+			'-h',
+		];
 
-/**
- * Test for running all commands
- */
-const argsMultiple = [
-	'node',
-	'pancake',
-	'path/file',
-	'--set',
-	'npmOrg',
-	'@yourOrg',
-	'--verbose',
-	'--version',
-	'--nosave',
-	'--noplugins',
-	'--ignore',
-	'@gov.au/pancake-js,@gov.au/pancake-sass',
-	'--help',
-];
-
-const resultMultiple = {
-	cwd: 'path/file',
-	version: true,
-	verbose: true,
-	nosave: true,
-	set: [
-		'npmOrg',
-		'@yourOrg',
-	],
-	org: settings.npmOrg,
-	plugins: false,
-	ignorePlugins: [
-		'@gov.au/pancake-js',
-		'@gov.au/pancake-sass',
-	],
-	help: true,
-};
-
-test('Parse args should return correct object for a single command', () => {
-	expect( ParseArgs( settings, argsMultiple ) ).toMatchObject( resultMultiple );
-});
-
-
-/**
- * Test for running all commands as shortcuts
- */
-const argsMultipleShort = [
-	'node',
-	'pancake',
-	'path/file',
-	'-s',
-	'npmOrg',
-	'@yourOrg',
-	'-v',
-	'-V',
-	'-n',
-	'-p',
-	'-i',
-	'@gov.au/pancake-js,@gov.au/pancake-sass',
-	'-h',
-]
-
-test('Parse args should return correct object for a single command', () => {
-	expect( ParseArgs( settings, argsMultipleShort ) ).toMatchObject( resultMultiple );
+		expect( ParseArgs( settings, args ) ).toEqual({
+			...baseExpectation,
+			cwd: 'path/file',
+			set: ['npmOrg', '@yourOrg'],
+			verbose: true,
+			version: true,
+			nosave: true,
+			plugins: false,
+			ignorePlugins: ['@gov.au/pancake-js', '@gov.au/pancake-sass'],
+			help: true,
+			json: true,
+			silent: true,
+		});
+	});
 });
