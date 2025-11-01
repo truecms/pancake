@@ -328,6 +328,7 @@ const TESTER = (() => { //constructor factory
 					const sassVersion = require('../packages/pancake-sass/package.json').version;
 					const jsVersion = require('../packages/pancake-js/package.json').version;
 					const reactVersion = require('../packages/pancake-react/package.json').version;
+					const jsonVersion = require('../packages/pancake-json/package.json').version;
 
 					Replace({
 							files: [
@@ -335,18 +336,20 @@ const TESTER = (() => { //constructor factory
 							],
 							from: [
 								/\[version\]/g,
-								/\[sass-version\]/g,
-								/\[js-version\]/g,
-								/\[react-version\]/g,
-								/\[path\]/g,
-							],
-							to: [
-								version,
-								sassVersion,
-								jsVersion,
-								reactVersion,
-								Path.normalize(`${ __dirname }/..`),
-							],
+							/\[sass-version\]/g,
+							/\[js-version\]/g,
+							/\[react-version\]/g,
+							/\[json-version\]/g,
+							/\[path\]/g,
+						],
+						to: [
+							version,
+							sassVersion,
+							jsVersion,
+							reactVersion,
+							jsonVersion,
+							Path.normalize(`${ __dirname }/..`),
+						],
 							allowEmptyPaths: true,
 							encoding: 'utf8',
 						})

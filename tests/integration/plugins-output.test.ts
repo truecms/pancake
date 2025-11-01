@@ -25,12 +25,14 @@ const pancakePkg = JSON.parse( readFileSync( join( rootDir, 'packages', 'pancake
 const sassPkg = JSON.parse( readFileSync( join( rootDir, 'packages', 'pancake-sass', 'package.json' ), 'utf8' ) );
 const jsPkg = JSON.parse( readFileSync( join( rootDir, 'packages', 'pancake-js', 'package.json' ), 'utf8' ) );
 const reactPkg = JSON.parse( readFileSync( join( rootDir, 'packages', 'pancake-react', 'package.json' ), 'utf8' ) );
+const jsonPkg = JSON.parse( readFileSync( join( rootDir, 'packages', 'pancake-json', 'package.json' ), 'utf8' ) );
 
 const placeholderFrom = [
 	/\[version\]/g,
 	/\[sass-version\]/g,
 	/\[js-version\]/g,
 	/\[react-version\]/g,
+	/\[json-version\]/g,
 	/\[path\]/g,
 ];
 
@@ -39,6 +41,7 @@ const placeholderTo = [
 	sassPkg.version,
 	jsPkg.version,
 	reactPkg.version,
+	jsonPkg.version,
 	rootDir,
 ];
 
