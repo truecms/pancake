@@ -5,6 +5,8 @@ Pancake
 
 > Pancake is a tool to make working with npm on the front end easy and sweet.
 
+> **Legacy scope:** Releases published before the `@truecms/*` migration remain available under the archived `@gov.au/*` namespace for teams who still depend on them. New work happens exclusively in the `@truecms` scope.
+
 ![The Pancake tool](https://raw.githubusercontent.com/govau/pancake/master/assets/pancake.png)
 
 [Npm wrote about](http://blog.npmjs.org/post/101775448305/npm-and-front-end-packaging) the challenges frontend developers face when trying to use npm. Pancake is addressing those by embracing the idea of small individually versioned independent modules. Interdependencies is what npm does really well and Pancake will help you keep them flat and error out on conflicts. [Read more about our solution](https://medium.com/dailyjs/npm-and-the-front-end-950c79fc22ce)
@@ -73,7 +75,7 @@ npx pancake --set [settingName] [value]
 
 |     setting     |                 value                 |  default  |
 |-----------------|---------------------------------------|-----------|
-|     `npmOrg`    | This is the npm org scope             | `@gov.au` |
+|     `npmOrg`    | This is the npm org scope             | `@truecms` |
 |    `plugins`    | A switch to disable or enable plugins | `true`    |
 | `ignorePlugins` | An array of plugins to be ignored     | `[]`      |
 
@@ -96,7 +98,7 @@ To change local settings all you have to do is include a `pancake` object into y
     "auto-save": true,               //enable/disable auto saving the settings into your package.json after each run
     "plugins": true,                 //enable/disable plugins
     "ignore": [],                    //ignore specific plugins
-    "css": {                         //settings for the @gov.au/pancake-sass plugin
+    "css": {                         //settings for the @truecms/pancake-sass plugin
       "minified": true,              //minify the css?
       "modules": false,              //save one css file per module?
       "browsers": [                  //autoprefixer browser matrix
@@ -108,21 +110,21 @@ To change local settings all you have to do is include a `pancake` object into y
       "location": "pancake/css/",    //the location to save the css files to
       "name": "pancake.min.css"      //the name of the css file that includes all modules; set this to false to disable it
     },
-    "sass": {                        //settings for the @gov.au/pancake-sass plugin
+    "sass": {                        //settings for the @truecms/pancake-sass plugin
       "modules": false,              //save one Sass file per module?
       "location": "pancake/sass/",   //the location to save the Sass files to
       "name": "pancake.scss"         //the name of the Sass file that includes all modules; set this to false to disable it
     },
-    "js": {                          //settings for the @gov.au/pancake-js plugin
+    "js": {                          //settings for the @truecms/pancake-js plugin
       "minified": true,              //minify the js?
       "modules": false,              //save one js file per module?
       "location": "pancake/js/",     //the location to save the js files to
       "name": "pancake.min.js"       //the name of the js file that includes all modules; set this to false to disable it
     },
-    "react": {                       //settings for the @gov.au/pancake-react plugin
+    "react": {                       //settings for the @truecms/pancake-react plugin
       "location": "pancake/react/",  //the location to save the react files to; set this to false to disable it
     },
-    "json": {                        //settings for the @gov.au/pancake-json plugin
+    "json": {                        //settings for the @truecms/pancake-json plugin
       "enable": false,               //the pancake-json plugin is off by default
       "location": "pancake/js/",     //the location to save the json files to
       "name": "pancake",             //the name of the json file
@@ -195,7 +197,7 @@ Type: `<flag> [comma separated list]`
 You can temporarily overwrite the list of plugins to be disabled.
 
 ```shell
-npx pancake --ignore @gov.au/pancake-svg,@gov.au/pancake-js
+npx pancake --ignore @truecms/pancake-svg,@truecms/pancake-js
 ```
 
 
@@ -231,7 +233,7 @@ npx pancake --verbose
 To install pancake use node package manager.
 
 ```
-npm i @gov.au/pancake
+npm i @truecms/pancake
 ```
 
 
@@ -248,9 +250,9 @@ To make sure Pancake can detect your module amongst the other hundred npm packag
 +    "pancake-module": {                   //pancake is looking for this object to id your module as a pancake module
 +      "version": "1.0.0",                 //the major version of pancake
 +      "plugins": [                        //only state the plugins you need here
-+        "@gov.au/pancake-sass"
++        "@truecms/pancake-sass"
 +      ],
-+      "org": "@gov.au @nsw.gov.au",       //the npm organisations that will be searched for pancake modules
++      "org": "@truecms @nsw.gov.au",       //the npm organisations that will be searched for pancake modules
 +      "sass": {                           //sass plugin specific settings
 +        "path": "lib/sass/_module.scss",  //where is your sass
 +        "sass-versioning": true           //enable sass-versioning. Read more here: https://github.com/dominikwilkowski/sass-versioning
@@ -287,7 +289,7 @@ The magic of Pancake lies within the `postinstall` script. To enable Pancake add
     "pancake-module": {
       "version": "1.0.0",
       "plugins": [
-        "@gov.au/pancake-sass"
+        "@truecms/pancake-sass"
       ],
       "sass": {
         "path": "lib/sass/_module.scss",
@@ -302,7 +304,7 @@ The magic of Pancake lies within the `postinstall` script. To enable Pancake add
     }
   },
   "dependencies": {
-+    "@gov.au/pancake": "~1"
++    "@truecms/pancake": "~1"
   },
   "peerDependencies": {},
   "devDependencies": {},
@@ -336,7 +338,7 @@ peer dependency and pancake can check if you have conflicts.
     "pancake-module": {
       "version": "1.0.0",
       "plugins": [
-        "@gov.au/pancake-sass"
+        "@truecms/pancake-sass"
       ],
       "sass": {
         "path": "lib/sass/_module.scss",
@@ -351,12 +353,12 @@ peer dependency and pancake can check if you have conflicts.
     }
   },
   "dependencies": {
-    "@gov.au/pancake": "~1",
+    "@truecms/pancake": "~1",
 
-+    "@gov.au/core": "^0.1.0"
++    "@truecms/core": "^0.1.0"
   },
   "peerDependencies": {
-+    "@gov.au/core": "^0.1.0"
++    "@truecms/core": "^0.1.0"
   },
   "devDependencies": {},
   "scripts": {
@@ -437,21 +439,21 @@ The script requires Node.js 22 and Corepack-enabled pnpm. It will exit with a no
 We have published four test modules in our scoped npm org to test interdependencies and to debug with verbose mode switched on.
 Find below a list of what is inside each version:
 
-**@gov.au/testmodule1**
-- ![Testmodule1 version](https://img.shields.io/npm/v/@gov.au/testmodule1.svg?label=version&colorA=313131&colorB=1B7991)  
+**@truecms/testmodule1**
+- ![Testmodule1 version](https://img.shields.io/npm/v/@truecms/testmodule1.svg?label=version&colorA=313131&colorB=1B7991)  
 
-**@gov.au/testmodule2**
-- ![Testmodule2 version](https://img.shields.io/npm/v/@gov.au/testmodule2.svg?label=version&colorA=313131&colorB=1B7991)  
-	- └── `@gov.au/testmodule1`: `^15.0.0`
+**@truecms/testmodule2**
+- ![Testmodule2 version](https://img.shields.io/npm/v/@truecms/testmodule2.svg?label=version&colorA=313131&colorB=1B7991)  
+	- └── `@truecms/testmodule1`: `^15.0.0`
 
-**@gov.au/testmodule3**
-- ![Testmodule3 version](https://img.shields.io/npm/v/@gov.au/testmodule3.svg?label=version&colorA=313131&colorB=1B7991)  
-	- ├── `@gov.au/testmodule1`: `^15.0.0`
-	- └── `@gov.au/testmodule2`: `^19.0.0`
+**@truecms/testmodule3**
+- ![Testmodule3 version](https://img.shields.io/npm/v/@truecms/testmodule3.svg?label=version&colorA=313131&colorB=1B7991)  
+	- ├── `@truecms/testmodule1`: `^15.0.0`
+	- └── `@truecms/testmodule2`: `^19.0.0`
 
-**@gov.au/testmodule4**
-- ![Testmodule4 version](https://img.shields.io/npm/v/@gov.au/testmodule4.svg?label=version&colorA=313131&colorB=1B7991)  
-	- └── `@gov.au/testmodule1`: `^15.0.0`
+**@truecms/testmodule4**
+- ![Testmodule4 version](https://img.shields.io/npm/v/@truecms/testmodule4.svg?label=version&colorA=313131&colorB=1B7991)  
+	- └── `@truecms/testmodule1`: `^15.0.0`
 
 
 ### Software tests

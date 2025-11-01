@@ -1,5 +1,5 @@
 {
-	"name": "@gov.au/pancake-svg",
+	"name": "@truecms/pancake-svg",
 	"version": "1.2.0",
 	"description": "A Pancake plugin to generate svg sprites and png fallbacks.",
 	"packageManager": "pnpm@8.15.9",
@@ -47,8 +47,7 @@
 		"lib/*"
 	],
 	"dependencies": {
-		"@gov.au/pancake": "~1",
-
+		"@truecms/pancake": "~1",
 		"babel-runtime": "6.26.0"
 	},
 	"devDependencies": {

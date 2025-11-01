@@ -1,2 +1,2 @@
-/*! @gov.au/testmodule5 v11.0.0 */
+/*! @truecms/testmodule5 v11.0.0 */
 confirm("testmodule5:v11.0.0");

@@ -25,13 +25,13 @@ const normaliseLines = lines => lines.map( item => ( {
 // testing AddDeps
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const dependencies1 = {
-	"@gov.au/core": "^0.1.0",
-	"@gov.au/link-list": "^0.1.0",
+	"@truecms/core": "^0.1.0",
+	"@truecms/link-list": "^0.1.0",
 };
 const installed1 = new Map();
-installed1.set( '@gov.au/testmodule1', '11.0.1' );
-installed1.set( '@gov.au/testmodule2', '11.0.0' );
-installed1.set( '@gov.au/testmodule3', '11.0.0' );
+installed1.set( '@truecms/testmodule1', '11.0.1' );
+installed1.set( '@truecms/testmodule2', '11.0.0' );
+installed1.set( '@truecms/testmodule3', '11.0.0' );
 
 const result1 = {
 	breakage: false,
@@ -56,15 +56,15 @@ test('AddDeps - Should return an object with dependencies', () => {
 
 
 const dependencies2 = {
-	"@gov.au/core": "^0.1.0",
-	"@gov.au/link-list": "^0.1.0",
+	"@truecms/core": "^0.1.0",
+	"@truecms/link-list": "^0.1.0",
 };
 const installed2 = new Map();
-installed2.set( '@gov.au/testmodule1', '11.0.1' );
-installed2.set( '@gov.au/testmodule2', '11.0.0' );
-installed2.set( '@gov.au/testmodule3', '11.0.0' );
-installed2.set( '@gov.au/testmodule4', '12.0.0' );
-installed2.set( '@gov.au/testmodule5', '13.0.0' );
+installed2.set( '@truecms/testmodule1', '11.0.1' );
+installed2.set( '@truecms/testmodule2', '11.0.0' );
+installed2.set( '@truecms/testmodule3', '11.0.0' );
+installed2.set( '@truecms/testmodule4', '12.0.0' );
+installed2.set( '@truecms/testmodule5', '13.0.0' );
 
 const result2 = {
 	breakage: false,
@@ -89,17 +89,17 @@ test('AddDeps - Should return an object with dependencies nicely centered', () =
 
 
 const dependencies3 = {
-	"@gov.au/core": "^0.1.0",
-	"@gov.au/link-list": "^0.1.0",
-	"@gov.au/testmodule2": "^11.1.0",
-	"@gov.au/testmodule5": "^13.1.0",
+	"@truecms/core": "^0.1.0",
+	"@truecms/link-list": "^0.1.0",
+	"@truecms/testmodule2": "^11.1.0",
+	"@truecms/testmodule5": "^13.1.0",
 };
 const installed3 = new Map();
-installed3.set( '@gov.au/testmodule1', '11.0.1' );
-installed3.set( '@gov.au/testmodule2', '11.0.0' );
-installed3.set( '@gov.au/testmodule3', '11.0.0' );
-installed3.set( '@gov.au/testmodule4', '12.0.0' );
-installed3.set( '@gov.au/testmodule5', '13.0.0' );
+installed3.set( '@truecms/testmodule1', '11.0.1' );
+installed3.set( '@truecms/testmodule2', '11.0.0' );
+installed3.set( '@truecms/testmodule3', '11.0.0' );
+installed3.set( '@truecms/testmodule4', '12.0.0' );
+installed3.set( '@truecms/testmodule5', '13.0.0' );
 
 const result3 = {
 	breakage: true,
@@ -122,8 +122,8 @@ const result3 = {
 		},
 	],
 	breaking: [
-		'@gov.au/testmodule2@^11.1.0',
-		'@gov.au/testmodule5@^13.1.0'
+		'@truecms/testmodule2@^11.1.0',
+		'@truecms/testmodule5@^13.1.0'
 	],
 };
 

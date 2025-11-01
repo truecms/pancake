@@ -18,22 +18,22 @@ const { CheckModules } = require( '../src/conflicts' );
  */
 const allModulesNoConflicts = [
 	{
-		'name': '@gov.au/testmodule1',
+		'name': '@truecms/testmodule1',
 		'version': '11.0.1',
 		'peerDependencies': {},
 	},
 	{
-		'name': '@gov.au/testmodule2',
+		'name': '@truecms/testmodule2',
 		'version': '11.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1': '^11.0.1',
+			'@truecms/testmodule1': '^11.0.1',
 		},
 	},
 	{
-		'name': '@gov.au/testmodule3',
+		'name': '@truecms/testmodule3',
 		'version': '11.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1': '^11.0.1',
+			'@truecms/testmodule1': '^11.0.1',
 		},
 	},
 ];
@@ -55,22 +55,22 @@ test('No conflicts between pancake modules should return correct result', () => 
  */
 const allModulesMinorConflict = [
 	{
-		'name': '@gov.au/testmodule1',
+		'name': '@truecms/testmodule1',
 		'version': '11.0.1',
 		'peerDependencies': {},
 	},
 	{
-		'name': '@gov.au/testmodule2',
+		'name': '@truecms/testmodule2',
 		'version': '11.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1': '^11.0.1',
+			'@truecms/testmodule1': '^11.0.1',
 		},
 	},
 	{
-		'name': '@gov.au/testmodule3',
+		'name': '@truecms/testmodule3',
 		'version': '11.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1': '^11.5.3',
+			'@truecms/testmodule1': '^11.5.3',
 		},
 	},
 ];
@@ -78,13 +78,13 @@ const allModulesMinorConflict = [
 const resultMinorConflict = {
 	'conflicts': true,
 	'message': expect.any( String ),
-	'module': '@gov.au/testmodule1',
+	'module': '@truecms/testmodule1',
 	'dependencies': {
 		'^11.5.3': [
-			'@gov.au/testmodule3',
+			'@truecms/testmodule3',
 		],
 		'^11.0.1': [
-			'@gov.au/testmodule2',
+			'@truecms/testmodule2',
 		],
 	},
 };
@@ -99,22 +99,22 @@ test('Single minor conflict between pancake modules should return correct result
  */
 const allModulesMinorConflicts = [
 	{
-		'name': '@gov.au/testmodule1',
+		'name': '@truecms/testmodule1',
 		'version': '11.0.1',
 		'peerDependencies': {},
 	},
 	{
-		'name': '@gov.au/testmodule2',
+		'name': '@truecms/testmodule2',
 		'version': '11.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1':'^11.6.2',
+			'@truecms/testmodule1':'^11.6.2',
 		},
 	},
 	{
-		'name': '@gov.au/testmodule3',
+		'name': '@truecms/testmodule3',
 		'version': '11.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1': '^11.5.3',
+			'@truecms/testmodule1': '^11.5.3',
 		},
 	},
 ];
@@ -122,13 +122,13 @@ const allModulesMinorConflicts = [
 const resultMinorConflicts = {
 	'conflicts': true,
 	'message': expect.any( String ),
-	'module': '@gov.au/testmodule1',
+	'module': '@truecms/testmodule1',
 	'dependencies': {
 		'^11.5.3': [
-			'@gov.au/testmodule3',
+			'@truecms/testmodule3',
 		],
 		'^11.6.2': [
-			'@gov.au/testmodule2',
+			'@truecms/testmodule2',
 		],
 	},
 };
@@ -143,22 +143,22 @@ test('Multiple minor conflicts between pancake modules should return correct res
  */
 const allModulesMajorConflict = [
 	{
-		'name': '@gov.au/testmodule1',
+		'name': '@truecms/testmodule1',
 		'version': '11.0.1',
 		'peerDependencies': {},
 	},
 	{
-		'name': '@gov.au/testmodule2',
+		'name': '@truecms/testmodule2',
 		'version': '11.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1': '^11.0.1',
+			'@truecms/testmodule1': '^11.0.1',
 		},
 	},
 	{
-		'name': '@gov.au/testmodule3',
+		'name': '@truecms/testmodule3',
 		'version': '11.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1': '^10.0.1',
+			'@truecms/testmodule1': '^10.0.1',
 		},
 	},
 ];
@@ -166,13 +166,13 @@ const allModulesMajorConflict = [
 const resultMajorConflict = {
 	'conflicts': true,
 	'message': expect.any( String ),
-	'module': '@gov.au/testmodule1',
+	'module': '@truecms/testmodule1',
 	'dependencies': {
 		'^10.0.1': [
-			'@gov.au/testmodule3',
+			'@truecms/testmodule3',
 		],
 		'^11.0.1': [
-			'@gov.au/testmodule2',
+			'@truecms/testmodule2',
 		],
 	},
 };
@@ -187,29 +187,29 @@ test('Single major conflict between pancake modules should return correct result
  */
 const allModulesMajorConflicts = [
 	{
-		'name': '@gov.au/testmodule1',
+		'name': '@truecms/testmodule1',
 		'version': '11.0.1',
 		'peerDependencies': {},
 	},
 	{
-		'name': '@gov.au/testmodule2',
+		'name': '@truecms/testmodule2',
 		'version': '11.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1': '^11.0.1',
+			'@truecms/testmodule1': '^11.0.1',
 		},
 	},
 	{
-		'name': '@gov.au/testmodule3',
+		'name': '@truecms/testmodule3',
 		'version': '11.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1': '^10.0.1',
+			'@truecms/testmodule1': '^10.0.1',
 		},
 	},
 	{
-		'name': '@gov.au/testmodule4',
+		'name': '@truecms/testmodule4',
 		'version': '11.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1': '^9.0.1',
+			'@truecms/testmodule1': '^9.0.1',
 		},
 	},
 ];
@@ -217,16 +217,16 @@ const allModulesMajorConflicts = [
 const resultMajorConflicts = {
 	'conflicts': true,
 	'message': expect.any( String ),
-	'module': '@gov.au/testmodule1',
+	'module': '@truecms/testmodule1',
 	'dependencies': {
 		'^10.0.1': [
-			'@gov.au/testmodule3',
+			'@truecms/testmodule3',
 		],
 		'^11.0.1': [
-			'@gov.au/testmodule2',
+			'@truecms/testmodule2',
 		],
 		'^9.0.1': [
-			'@gov.au/testmodule4',
+			'@truecms/testmodule4',
 		],
 	},
 };

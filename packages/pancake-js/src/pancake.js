@@ -23,7 +23,7 @@ const Fs = require( 'fs' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Module imports
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const { Log, Style, Loading, ReadFile, WriteFile } = require( '@gov.au/pancake' );
+const { Log, Style, Loading, ReadFile, WriteFile } = require( '@truecms/pancake' );
 const { HandleJS, MinifyAllJS } = require('./js' );
 
 Log.output = true; //this plugin assumes you run it through pancake

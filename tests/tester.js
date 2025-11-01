@@ -180,7 +180,7 @@ const TESTER = (() => { //constructor factory
 				name: 'Test14: Compile test with three modules from two organisations',
 				folder: 'test14',
 				script: {
-					options: [ '--org', '@nsw.gov.au @gov.au' ],
+					options: [ '--org', '@nsw.gov.au @truecms' ],
 				},
 				compare: 'pancake/',
 				empty: false,

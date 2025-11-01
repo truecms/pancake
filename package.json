@@ -10,13 +10,18 @@
 		"watch": "pnpm exec onchange packages/*/src/ -- pnpm run build",
 		"purge": "pnpm exec rimraf packages/*/node_modules && pnpm exec rimraf packages/*/dist && pnpm exec rimraf packages/*/lib && pnpm exec rimraf node_modules",
 		"build": "pnpm -r run build",
-		"install:check": "node scripts/install-check.mjs"
+		"install:check": "node scripts/install-check.mjs",
+		"changeset": "pnpm exec changeset",
+		"release:dry-run": "node scripts/release/dry-run.mjs --dry-run",
+		"release:publish": "pnpm exec changeset publish"
 	},
 	"engines": {
 		"node": ">=22",
 		"npm": ">=10"
 	},
 	"devDependencies": {
+		"@changesets/changelog-github": "^0.5.1",
+		"@changesets/cli": "^2.29.7",
 		"@babel/core": "^7.3.4",
 		"@babel/preset-env": "^7.3.4",
 		"chalk": "^4.1.2",

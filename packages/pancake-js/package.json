@@ -1,5 +1,5 @@
 {
-	"name": "@gov.au/pancake-js",
+	"name": "@truecms/pancake-js",
 	"version": "1.2.1",
 	"description": "A Pancake plugin to minify js files.",
 	"packageManager": "pnpm@8.15.9",
@@ -46,7 +46,7 @@
 		"lib/*"
 	],
 	"dependencies": {
-		"@gov.au/pancake": "~1",
+		"@truecms/pancake": "~1",
 		"esbuild": "^0.21.5"
 	},
 	"devDependencies": {

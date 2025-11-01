@@ -17,7 +17,7 @@ const workspacePackages = [
 const aliasEntries = workspacePackages.flatMap( pkg => {
 	const sourcePath = resolve( rootDir, 'packages', pkg, 'src' );
 	return [
-		[ `@gov.au/${ pkg }`, sourcePath ],
+		[ `@truecms/${ pkg }`, sourcePath ],
 		[ `@truecms/${ pkg }`, sourcePath ]
 	];
 } );

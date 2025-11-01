@@ -23,7 +23,7 @@ const Fs = require( 'fs' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Module imports
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const { Log, Style, Loading, ReadFile, WriteFile } = require( '@gov.au/pancake' );
+const { Log, Style, Loading, ReadFile, WriteFile } = require( '@truecms/pancake' );
 
 const SCHEMA_VERSION = '1.0.0';
 
@@ -170,8 +170,8 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 				}
 			}
 
-			discoveredPlugins.add( '@gov.au/pancake-json' );
-			discoveredPlugins.add( '@gov.au/pancake' );
+			discoveredPlugins.add( '@truecms/pancake-json' );
+			discoveredPlugins.add( '@truecms/pancake' );
 
 			if( Object.keys( JSONOutput ).length > 0 ) {
 				const jsonPath = Path.normalize(`${ cwd }/${ SETTINGS.json.location }/${ SETTINGS.json.name }.json`);

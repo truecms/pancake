@@ -17,7 +17,7 @@
 const Fs = require( 'fs' );
 const Path = require( 'path' );
 
-const { Log, Style, ReadFile, WriteFile } = require( '@gov.au/pancake' );
+const { Log, Style, ReadFile, WriteFile } = require( '@truecms/pancake' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------

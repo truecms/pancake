@@ -14,7 +14,7 @@ const { ParseArgs } = require( '../src/parse-arguments' );
 // Shared fixtures
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const settings = {
-	'npmOrg': '@gov.au @nsw.gov.au',
+	'npmOrg': '@truecms @nsw.gov.au',
 	'plugins': true,
 	'ignorePlugins': [],
 };
@@ -62,7 +62,7 @@ describe('ParseArgs', () => {
 			'--version',
 			'--nosave',
 			'--noplugins',
-			'--ignore', '@gov.au/pancake-js,@gov.au/pancake-sass',
+			'--ignore', '@truecms/pancake-js,@truecms/pancake-sass',
 			'--json',
 			'--help',
 		];
@@ -75,7 +75,7 @@ describe('ParseArgs', () => {
 			version: true,
 			nosave: true,
 			plugins: false,
-			ignorePlugins: ['@gov.au/pancake-js', '@gov.au/pancake-sass'],
+			ignorePlugins: ['@truecms/pancake-js', '@truecms/pancake-sass'],
 			help: true,
 			json: true,
 		});
@@ -91,7 +91,7 @@ describe('ParseArgs', () => {
 			'-V',
 			'-n',
 			'-p',
-			'-i', '@gov.au/pancake-js,@gov.au/pancake-sass',
+			'-i', '@truecms/pancake-js,@truecms/pancake-sass',
 			'-j',
 			'-q',
 			'-h',
@@ -105,7 +105,7 @@ describe('ParseArgs', () => {
 			version: true,
 			nosave: true,
 			plugins: false,
-			ignorePlugins: ['@gov.au/pancake-js', '@gov.au/pancake-sass'],
+			ignorePlugins: ['@truecms/pancake-js', '@truecms/pancake-sass'],
 			help: true,
 			json: true,
 			silent: true,

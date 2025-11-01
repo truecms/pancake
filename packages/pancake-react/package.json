@@ -1,5 +1,5 @@
 {
-	"name": "@gov.au/pancake-react",
+	"name": "@truecms/pancake-react",
 	"version": "1.3.0",
 	"description": "A Pancake plugin to move react files.",
 	"packageManager": "pnpm@8.15.9",
@@ -47,7 +47,7 @@
 		"lib/*"
 	],
 	"dependencies": {
-		"@gov.au/pancake": "~1"
+		"@truecms/pancake": "~1"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.2.3",

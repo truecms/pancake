@@ -1,13 +1,13 @@
 {
-	"name": "@gov.au/testmodule4",
+	"name": "@truecms/testmodule4",
 	"version": "1.0.2",
 	"description": "Testing module for design system components",
 	"pancake": {
 		"pancake-module": {
 			"version": "1.0.0",
 			"plugins": [
-				"@gov.au/pancake-js",
-				"@gov.au/pancake-json"
+				"@truecms/pancake-js",
+				"@truecms/pancake-json"
 			],
 			"sass": {
 				"path": "lib/sass/_module.scss",
@@ -22,12 +22,11 @@
 		"postinstall": "pancake -v"
 	},
 	"dependencies": {
-		"@gov.au/pancake": "~1",
-
-		"@gov.au/testmodule1": "^15.0.0"
+		"@truecms/pancake": "~1",
+		"@truecms/testmodule1": "^15.0.0"
 	},
 	"peerDependencies": {
-		"@gov.au/testmodule1": "^15.0.0"
+		"@truecms/testmodule1": "^15.0.0"
 	},
 	"author": "TODO",
 	"license": "MIT"

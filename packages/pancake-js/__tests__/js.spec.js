@@ -11,11 +11,11 @@ const Os = require( 'os' );
 const Path = require( 'path' );
 
 const { MinifyJS, HandleJS, MinifyAllJS } = require( '../src/js.js' );
-const { Log } = require( '@gov.au/pancake' );
+const { Log } = require( '@truecms/pancake' );
 
 
-const fixtureModulePath = Path.normalize(`${ __dirname }/../../../tests/test2/node_modules/@gov.au/testmodule1/lib/js/module.js`);
-const fixtureTag = '@gov.au/testmodule1 v11.0.1';
+const fixtureModulePath = Path.normalize(`${ __dirname }/../../../tests/test2/node_modules/@truecms/testmodule1/lib/js/module.js`);
+const fixtureTag = '@truecms/testmodule1 v11.0.1';
 const pancakeVersion = require( Path.normalize(`${ __dirname }/../../pancake/package.json`) ).version;
 const pancakeJsVersion = require( Path.normalize(`${ __dirname }/../package.json`) ).version;
 
@@ -31,7 +31,7 @@ afterEach( () => {
 // MinifyJS function
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const sampleJs = `var x = 2; var y = z;`;
-const sampleFile = Path.normalize(`${ __dirname }/../../../tests/test2/node_modules/@gov.au/testmodule2/lib/js/module.js`);
+const sampleFile = Path.normalize(`${ __dirname }/../../../tests/test2/node_modules/@truecms/testmodule2/lib/js/module.js`);
 
 test( 'MinifyJS should return minified JS', () => {
 	const output = MinifyJS( sampleJs, sampleFile );
