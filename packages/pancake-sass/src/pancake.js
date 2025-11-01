@@ -24,8 +24,54 @@ const Fs = require( 'fs' );
 // Module imports
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const { Log, Style, Loading, ReadFile, WriteFile } = require( '@gov.au/pancake' );
+const Browserslist = require( 'browserslist' );
 const { StripDuplicateLines } = require( './helpers' );
 const { GenerateSass, Sassify } = require( './sass' );
+
+const DEFAULT_BROWSERSLIST = Object.freeze([
+	'> 0.5%',
+	'last 2 versions',
+	'Firefox ESR',
+	'not dead',
+	'not IE 11',
+	'not op_mini all',
+]);
+
+const loadSharedBrowserslist = cwd => {
+	const searchPath = ( typeof cwd === 'string' && cwd.length > 0 ) ? cwd : process.cwd();
+
+	try {
+		const resolved = Browserslist.loadConfig({ path: searchPath });
+
+		if( Array.isArray( resolved ) && resolved.length > 0 ) {
+			Log.verbose(`Sass: Loaded shared Browserslist from ${ Style.yellow( searchPath ) }`);
+			return resolved.slice();
+		}
+	}
+	catch( error ) {
+		const message = ( error && error.message ) ? error.message : error;
+		Log.verbose(`Sass: Unable to load shared Browserslist from ${ Style.yellow( searchPath ) }: ${ message }`);
+	}
+
+	Log.verbose('Sass: Falling back to default Browserslist targets');
+	return DEFAULT_BROWSERSLIST.slice();
+};
+
+const resolveSharedBrowserslist = ( settingsCSS, cwd ) => {
+	const hasExplicitBrowserslist = Array.isArray( settingsCSS.browserslist ) && settingsCSS.browserslist.length > 0;
+	const hasExplicitBrowsers = Array.isArray( settingsCSS.browsers ) && settingsCSS.browsers.length > 0;
+
+	if( hasExplicitBrowserslist ) {
+		return settingsCSS.browserslist.slice();
+	}
+
+	if( hasExplicitBrowsers ) {
+		Log.verbose('Sass: Using legacy browsers array from pancake configuration');
+		return settingsCSS.browsers.slice();
+	}
+
+	return loadSharedBrowserslist( cwd );
+};
 
 Log.output = true; //this plugin assumes you run it through pancake
 
@@ -55,9 +101,11 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 		css: {
 			minified: true,
 			modules: false,
-			browsers: [ 'last 2 versions', 'ie 8', 'ie 9', 'ie 10' ],
+			browsers: [],
+			browserslist: [],
 			location: 'pancake/css/',
 			name: 'pancake.min.css',
+			sourcemap: false,
 		},
 		sass: {
 			modules: false,
@@ -68,6 +116,10 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 
 	//merging settings with host settings
 	Object.assign( SETTINGS.css, settings.css );
+
+	const sharedBrowserslist = resolveSharedBrowserslist( SETTINGS.css, cwd );
+	SETTINGS.css.browserslist = sharedBrowserslist.slice();
+	SETTINGS.css.browsers = sharedBrowserslist.slice();
 	Object.assign( SETTINGS.sass, settings.sass );
 
 

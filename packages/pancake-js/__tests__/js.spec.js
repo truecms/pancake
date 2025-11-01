@@ -6,69 +6,135 @@
  *
  **************************************************************************************************************************************************************/
 
+const Fs = require( 'fs' );
+const Os = require( 'os' );
+const Path = require( 'path' );
 
 const { MinifyJS, HandleJS, MinifyAllJS } = require( '../src/js.js' );
-const Path = require( 'path' );
+const { Log } = require( '@gov.au/pancake' );
+
+
+const fixtureModulePath = Path.normalize(`${ __dirname }/../../../tests/test2/node_modules/@gov.au/testmodule1/lib/js/module.js`);
+const fixtureTag = '@gov.au/testmodule1 v11.0.1';
+const pancakeVersion = require( Path.normalize(`${ __dirname }/../../pancake/package.json`) ).version;
+const pancakeJsVersion = require( Path.normalize(`${ __dirname }/../package.json`) ).version;
+
+const makeTempDir = () => Fs.mkdtempSync( Path.join( Os.tmpdir(), 'pancake-js-' ) );
+const cleanupTempDir = directory => Fs.rmSync( directory, { recursive: true, force: true } );
+
+afterEach( () => {
+	vi.restoreAllMocks();
+});
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // MinifyJS function
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const js = `var x = 2; var y = z;`;
-const file = Path.normalize(`${ __dirname }/../../../tests/test2/node_modules/@gov.au/testmodule2/lib/js/module.js`);
-const jsMinified = `var x=2,y=z;`;
+const sampleJs = `var x = 2; var y = z;`;
+const sampleFile = Path.normalize(`${ __dirname }/../../../tests/test2/node_modules/@gov.au/testmodule2/lib/js/module.js`);
 
-test('MinifyJs should return minified JS', () => {
-	expect( MinifyJS( js, file ) ).toBe( jsMinified );
+test( 'MinifyJS should return minified JS', () => {
+	const output = MinifyJS( sampleJs, sampleFile );
+	const normalized = output.replace( /\s+/g, '' );
+	expect( normalized ).toMatch( /^var[a-z]=2,[a-z]=z;$/ );
 });
 
 
-const jsError = `const x => ( y, z ) { return "This shouldn't work" }`; // MinifyJs cannot understand ES6
+const invalidJs = `const x => ( y, z ) { return "This shouldn't work" }`;
 
-test('MinifyJs should return same JS if it cannot minify the file', () => {
-	console.log = jest.fn();
-	console.error = jest.fn();
-
-	expect( MinifyJS( jsError, file ) ).toBe( jsError );
+test( 'MinifyJS should return original JS when transform fails', () => {
+	const errorSpy = vi.spyOn( Log, 'error' ).mockImplementation( () => {} );
+	const output = MinifyJS( invalidJs, sampleFile );
+	expect( output ).toBe( invalidJs );
+	expect( errorSpy ).toHaveBeenCalled();
 });
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // HandleJS function
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const from = Path.normalize(`${ __dirname }/../../../tests/test2/node_modules/@gov.au/testmodule1/lib/js/module.js`);
-const settings = {
-	'minified': true,
-	'modules': true,
-	'location': 'pancake/js/',
-	'name': 'pancake.min.js',
-};
-const to = Path.normalize(`${ __dirname }/../../../tests/test2/pancake/js/testmodule1.js`);
-const tag = '@gov.au/testmodule1 v11.0.1';
-const result = '/*! @gov.au/testmodule1 v11.0.1 */confirm(\"testmodule1:v11.0.1\");';
+test( 'HandleJS should emit CJS and ESM module outputs with sourcemaps', async () => {
+	const tempDir = makeTempDir();
+	const outputPath = Path.join( tempDir, 'testmodule1.js' );
 
-test('HandleJS should return minified code from specified path', () => {
-	return HandleJS( from, settings, to, tag ).then( data => {
-		expect( data ).toBe( result );
-	});
+	try {
+		const settings = {
+			minified: true,
+			modules: true,
+			sourcemap: true,
+			location: 'pancake/js/',
+			name: 'pancake.min.js',
+		};
+
+		const result = await HandleJS( fixtureModulePath, settings, outputPath, fixtureTag );
+		const esmPath = outputPath.replace( /\.js$/, '.mjs' );
+
+		expect( result.cjs.code ).toContain( 'confirm(' );
+		expect( result.esm.code ).toContain( 'confirm(' );
+		expect( result.cjs.code.startsWith(`/*! ${ fixtureTag } */`) ).toBe( true );
+		expect( result.esm.code.startsWith(`/*! ${ fixtureTag } */`) ).toBe( true );
+		expect( Fs.existsSync( outputPath ) ).toBe( true );
+		expect( Fs.existsSync( esmPath ) ).toBe( true );
+		expect( Fs.existsSync(`${ outputPath }.map`) ).toBe( true );
+		expect( Fs.existsSync(`${ esmPath }.map`) ).toBe( true );
+		expect( result.cjs.code ).toContain( '//# sourceMappingURL=testmodule1.js.map' );
+		expect( result.esm.code ).toContain( '//# sourceMappingURL=testmodule1.mjs.map' );
+	}
+	finally {
+		cleanupTempDir( tempDir );
+	}
 });
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // MinifyAllJS function
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const version = '1.0.8';
-const allJS = [];
-const settingsAllJS = {
-	'minified': true,
-	'modules': true,
-	'location': 'pancake/js/',
-	'name': 'pancake.min.js',
-};
-const pkgPath = Path.normalize(`${ __dirname }/../../../tests/test2`);
+test( 'MinifyAllJS should write aggregated bundles in both module formats', async () => {
+	const tempDir = makeTempDir();
+	const moduleTarget = Path.join( tempDir, 'modules', 'testmodule1.js' );
 
-test('MinifyAllJS should resolve promise', () => {
-	return MinifyAllJS( version, allJS, settingsAllJS, pkgPath ).then( data => {
-		expect( data ).toBe( true );
-	});
+	try {
+		const moduleSettings = {
+			minified: true,
+			modules: true,
+			sourcemap: true,
+			location: 'pancake/js/',
+			name: 'pancake.min.js',
+		};
+
+		const moduleResult = await HandleJS( fixtureModulePath, moduleSettings, moduleTarget, fixtureTag );
+
+		const bundleSettings = {
+			minified: true,
+			modules: true,
+			sourcemap: true,
+			location: 'bundles/js/',
+			name: 'pancake.min.js',
+		};
+
+		const bundleResult = await MinifyAllJS( pancakeVersion, [ moduleResult ], bundleSettings, tempDir );
+		expect( bundleResult ).toBe( true );
+
+		const cjsBundlePath = Path.join( tempDir, 'bundles/js/pancake.min.js' );
+		const esmBundlePath = Path.join( tempDir, 'bundles/js/pancake.min.mjs' );
+
+		expect( Fs.existsSync( cjsBundlePath ) ).toBe( true );
+		expect( Fs.existsSync( esmBundlePath ) ).toBe( true );
+		expect( Fs.existsSync(`${ cjsBundlePath }.map`) ).toBe( true );
+		expect( Fs.existsSync(`${ esmBundlePath }.map`) ).toBe( true );
+
+		const cjsContent = Fs.readFileSync( cjsBundlePath, 'utf8' );
+		const esmContent = Fs.readFileSync( esmBundlePath, 'utf8' );
+		const header = `/* PANCAKE v${ pancakeVersion } PANCAKE-JS v${ pancakeJsVersion } */`;
+
+		expect( cjsContent.startsWith( header ) ).toBe( true );
+		expect( esmContent.startsWith( header ) ).toBe( true );
+		expect( cjsContent ).toContain(`/*! ${ fixtureTag } */`);
+		expect( esmContent ).toContain(`/*! ${ fixtureTag } */`);
+		expect( cjsContent ).toContain( 'confirm(' );
+		expect( esmContent ).toContain( 'confirm(' );
+	}
+	finally {
+		cleanupTempDir( tempDir );
+	}
 });

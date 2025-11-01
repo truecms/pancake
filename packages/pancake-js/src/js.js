@@ -14,13 +14,99 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Dependencies
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const UglifyJS  = require( 'uglify-js' );
+const Esbuild = require( 'esbuild' );
 const Path = require( 'path' );
+
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Included modules
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const { Log, Style, ReadFile, WriteFile } = require( '@gov.au/pancake' );
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Helpers
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+const DEFAULT_TARGET = [ 'es2019' ];
+
+const toEsmPath = filePath => {
+	if( typeof filePath !== 'string' ) {
+		return filePath;
+	}
+
+	if( filePath.endsWith( '.mjs' ) ) {
+		return filePath;
+	}
+
+	if( filePath.endsWith( '.js' ) ) {
+		return filePath.replace( /\.js$/, '.mjs' );
+	}
+
+	return `${ filePath }.mjs`;
+};
+
+const stripSourceMappingURL = code => {
+	if( typeof code !== 'string' ) {
+		return '';
+	}
+
+	return code.replace( /\s*\/\/# sourceMappingURL=.*?$/u, '' ).trimEnd();
+};
+
+const buildOutput = async ({
+	source,
+	format,
+	minify,
+	sourcemap,
+	sourcefile,
+	outfile,
+	banner,
+	legalComments = 'inline',
+}) => {
+	try {
+		const result = await Esbuild.build({
+			stdin: {
+				contents: source,
+				loader: 'js',
+				sourcefile,
+				resolveDir: Path.dirname( sourcefile ),
+			},
+			write: false,
+			bundle: false,
+			minify: Boolean( minify ),
+			sourcemap: sourcemap ? 'linked' : false,
+			format,
+			target: DEFAULT_TARGET,
+			platform: 'browser',
+			legalComments,
+			banner: banner ? { js: banner } : undefined,
+			outfile,
+		});
+
+		const jsFile = result.outputFiles.find( file => /\.(?:cjs|mjs|js)$/.test( file.path ) );
+		const mapFile = result.outputFiles.find( file => file.path.endsWith( '.map' ) );
+
+		return {
+			code: jsFile ? jsFile.text : '',
+			map: mapFile ? mapFile.text : null,
+			codeWithoutSourceMap: jsFile ? stripSourceMappingURL( jsFile.text ) : '',
+		};
+	}
+	catch( error ) {
+		Log.error(`Unable to build js code for ${ Style.yellow( sourcefile ) }`);
+		Log.error( error.message || error );
+
+		throw error;
+	}
+};
+
+const writeArtifact = async ( filePath, output, sourcemapEnabled ) => {
+	await WriteFile( filePath, output.code );
+
+	if( sourcemapEnabled && output.map ) {
+		await WriteFile( `${ filePath }.map`, output.map );
+	}
+};
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,27 +121,25 @@ const { Log, Style, ReadFile, WriteFile } = require( '@gov.au/pancake' );
  * @return {string}      - The minified js code
  */
 const MinifyJS = ( js, file ) => {
-
 	try {
-		const jsCode = UglifyJS.minify( js, { ie8: true } );
+		const jsCode = Esbuild.transformSync( js, {
+			loader: 'js',
+			minify: true,
+			format: 'cjs',
+			sourcefile: file,
+			sourcemap: false,
+			target: DEFAULT_TARGET,
+			legalComments: 'none',
+		});
 
-		if( jsCode.error ) {
-			Log.error(`Unable to uglify js code for ${ Style.yellow( file ) }`);
-			Log.error( jsCode.error );
-
-			return js;
-		}
-		else {
-			return jsCode.code;
-		}
+		return jsCode.code;
 	}
 	catch( error ) {
-		Log.error(`Unable to uglify js code for ${ Style.yellow( file ) }`);
-		Log.error( error.message );
+		Log.error(`Unable to minify js code for ${ Style.yellow( file ) }`);
+		Log.error( error.message || error );
 
 		return js;
 	}
-
 };
 
 
@@ -69,93 +153,120 @@ const MinifyJS = ( js, file ) => {
  *
  * @return {promise object}  - The js code either minified or bare bone
  */
-module.exports.HandleJS = ( from, settings, to, tag ) => {
-	return new Promise( ( resolve, reject ) => {
-		ReadFile( from ) //read the module
-			.catch( error => {
-				Log.error(`Unable to read file ${ Style.yellow( from ) }`);
-				Log.error( error );
+module.exports.HandleJS = async ( from, settings, to, tag ) => {
+	let source;
 
-				reject( error );
-			})
-			.then( ( content ) => {
+	try {
+		source = await ReadFile( from );
+	}
+	catch( error ) {
+		Log.error(`Unable to read file ${ Style.yellow( from ) }`);
+		Log.error( error );
 
-				let code = '';
+		throw error;
+	}
 
-				if( settings.minified ) { //minification = uglify code
-					code = MinifyJS( content, from );
+	const sourcemapEnabled = Boolean( settings.sourcemap );
+	const minify = Boolean( settings.minified );
+	const esmPath = toEsmPath( to );
+	const banner = `/*! ${ tag } */`;
 
-					Log.verbose(`JS: Successfully uglified JS for ${ Style.yellow( from ) }`);
-				}
-				else { //no minification = just copy and rename
-					code = `\n\n${ content }`;
-				}
+	const [ cjsOutput, esmOutput ] = await Promise.all([
+		buildOutput({
+			source,
+			format: 'cjs',
+			minify,
+			sourcemap: sourcemapEnabled,
+			sourcefile: from,
+			outfile: Path.basename( to ),
+			banner,
+		}),
+		buildOutput({
+			source,
+			format: 'esm',
+			minify,
+			sourcemap: sourcemapEnabled,
+			sourcefile: from,
+			outfile: Path.basename( esmPath ),
+			banner,
+		}),
+	]);
 
-				code = `/*! ${ tag } */${ code }`;
+	if( settings.modules ) {
+		await Promise.all([
+			writeArtifact( to, cjsOutput, sourcemapEnabled ),
+			writeArtifact( esmPath, esmOutput, sourcemapEnabled ),
+		]);
 
-				if( settings.modules ) { //are we saving modules?
-					WriteFile( to, code ) //write the generated content to file and return its promise
-						.catch( error => {
-							Log.error( error );
+		Log.verbose(`JS: Wrote module outputs for ${ Style.yellow( from ) }`);
+	}
 
-							reject( error );
-						})
-						.then( () => {
-							resolve( code );
-					});
-				}
-				else {
-					resolve( code ); //just return the promise
-				}
-		});
-	});
+	return {
+		tag,
+		from,
+		source,
+		cjs: cjsOutput,
+		esm: esmOutput,
+	};
 };
 
 
 /**
  * Minify all js modules together once their promises have resolved
  *
- * @param  {array}  version  - The version of mother pancake
- * @param  {array}  allJS    - An array of promise object for all js modules which will return their code
- * @param  {object} settings - The SettingsJS object
- * @param  {string} pkgPath  - The path to the current working directory
+ * @param  {array}  version        - The version of mother pancake
+ * @param  {array}  moduleOutputs  - An array of module build results
+ * @param  {object} settings       - The SettingsJS object
+ * @param  {string} pkgPath        - The path to the current working directory
  *
- * @return {promise object}  - Returns true once the promise is resolved
+ * @return {promise object}        - Returns true once the promise is resolved
  */
-module.exports.MinifyAllJS = ( version, allJS, settings, pkgPath ) => {
-	return new Promise( ( resolve, reject ) => {
-		Promise.all( allJS )
-			.catch( error => {
-				Log.error(`JS: Compiling JS ran into an error: ${ error }`);
-			})
-			.then( ( js ) => {
-				const Package = require( Path.normalize(`${ __dirname }/../package.json`) );
+module.exports.MinifyAllJS = async ( version, moduleOutputs, settings, pkgPath ) => {
+	const Package = require( Path.normalize(`${ __dirname }/../package.json`) );
+	const sourcemapEnabled = Boolean( settings.sourcemap );
+	const minify = Boolean( settings.minified );
+	const locationJS = Path.normalize(`${ pkgPath }/${ settings.location }/${ settings.name }`);
+	const esmLocation = toEsmPath( locationJS );
+	const header = `/* PANCAKE v${ version } PANCAKE-JS v${ Package.version } */`;
+	const outputs = ( moduleOutputs || [] ).filter( Boolean );
 
-				const locationJS = Path.normalize(`${ pkgPath }/${ settings.location }/${ settings.name }`);
-				let code = '';
+	const cjsSource = outputs
+		.map( output => output.cjs.codeWithoutSourceMap || output.cjs.code )
+		.join( '\n' );
 
-				if( settings.minified ) {
-					code = MinifyJS( js.join(`\n\n`), locationJS );
+	const esmSource = outputs
+		.map( output => output.esm.codeWithoutSourceMap || output.esm.code )
+		.join( '\n' );
 
-					Log.verbose(`JS: Successfully uglified JS for ${ Style.yellow( locationJS ) }`);
-				}
-				else {
-					code = '\n\n' + js.join(`\n\n`);
-				}
+	const [ cjsOutput, esmOutput ] = await Promise.all([
+		buildOutput({
+			source: cjsSource,
+			format: 'cjs',
+			minify,
+			sourcemap: sourcemapEnabled,
+			sourcefile: settings.name,
+			outfile: Path.basename( locationJS ),
+			banner: header,
+		}),
+		buildOutput({
+			source: esmSource,
+			format: 'esm',
+			minify,
+			sourcemap: sourcemapEnabled,
+			sourcefile: Path.basename( esmLocation ),
+			outfile: Path.basename( esmLocation ),
+			banner: header,
+		}),
+	]);
 
-				code = `/* PANCAKE v${ version } PANCAKE-JS v${ Package.version } */${ code }\n`;
+	await Promise.all([
+		writeArtifact( locationJS, cjsOutput, sourcemapEnabled ),
+		writeArtifact( esmLocation, esmOutput, sourcemapEnabled ),
+	]);
 
-				WriteFile( locationJS, code ) //write file
-					.catch( error => {
-						Log.error( error );
+	Log.verbose(`JS: Wrote aggregated bundles to ${ Style.yellow( locationJS ) }`);
 
-						reject( error );
-					})
-					.then( () => {
-						resolve( true );
-				});
-		});
-	});
+	return true;
 };
 
 module.exports.MinifyJS = MinifyJS;

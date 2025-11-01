@@ -5,10 +5,12 @@
  * @file - pancake-sass/src/sass.js
  *
  **************************************************************************************************************************************************************/
+const Path = require( 'path' );
+const Fs = require( 'fs' );
+const Os = require( 'os' );
 
 
 const { GetPath, GetDependencies, GenerateSass, Sassify } = require( '../src/sass' );
-const Path = require( 'path' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -121,6 +123,12 @@ const settings = {
 		'ie 9',
 		'ie 10',
 	],
+	'browserslist': [
+		'last 2 versions',
+		'ie 8',
+		'ie 9',
+		'ie 10',
+	],
 	'location': 'pancake/css/',
 	'name': 'pancake.min.css',
 };
@@ -135,4 +143,18 @@ test('Sassify should resolve promise', () => {
 	return Sassify( cssLocation, settings, sass ).then( data => {
 		expect( data ).toBe( true );
 	});
+});
+
+test('Sassify should write sourcemap when enabled', async () => {
+	const tempDir = Fs.mkdtempSync( Path.join( Os.tmpdir(), 'pancake-sass-test-' ) );
+	const tempCssLocation = Path.join( tempDir, 'pancake.min.css' );
+	const sourcemapSettings = Object.assign( {}, settings, { sourcemap: true } );
+
+	try {
+		await Sassify( tempCssLocation, sourcemapSettings, sass );
+		expect( Fs.existsSync( `${ tempCssLocation }.map` ) ).toBe( true );
+	}
+	finally {
+		Fs.rmSync( tempDir, { recursive: true, force: true } );
+	}
 });

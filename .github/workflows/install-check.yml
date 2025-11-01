@@ -1,0 +1,35 @@
+name: Install Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 001-upgrade-support-latest
+  workflow_dispatch:
+
+jobs:
+  install-check:
+    name: Install Check (Node 22)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@8.15.9 --activate
+
+      - name: Run deterministic install gate
+        env:
+          CI: 'true'
+        run: pnpm run install:check

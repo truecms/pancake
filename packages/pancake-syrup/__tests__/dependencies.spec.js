@@ -5,9 +5,20 @@
  * @file - pancake-syrup/src/dependencies.js
  *
  **************************************************************************************************************************************************************/
-
+if( !process.env.FORCE_COLOR ) {
+	process.env.FORCE_COLOR = '3';
+}
 
 const { AddDeps } = require( '../src/dependencies' );
+
+const cleanAnsi = line => line
+	.replace(/\u001b\[2m(?=\u001b\[2m)/g, '')
+	.replace(/\u001b\[2m(?=\u001b\[22m)/g, '' );
+
+const normaliseLines = lines => lines.map( item => ( {
+	type: item.type,
+	line: cleanAnsi( item.line ),
+} ) );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -38,7 +49,9 @@ const result1 = {
 };
 
 test('AddDeps - Should return an object with dependencies', () => {
-	expect( AddDeps( dependencies1, installed1, 10 ) ).toMatchObject( result1 );
+	const rendered = AddDeps( dependencies1, installed1, 10 );
+	rendered.lines = normaliseLines( rendered.lines );
+	expect( rendered ).toMatchObject( result1 );
 });
 
 
@@ -69,7 +82,9 @@ const result2 = {
 };
 
 test('AddDeps - Should return an object with dependencies nicely centered', () => {
-	expect( AddDeps( dependencies2, installed2, 20 ) ).toMatchObject( result2 );
+	const rendered = AddDeps( dependencies2, installed2, 20 );
+	rendered.lines = normaliseLines( rendered.lines );
+	expect( rendered ).toMatchObject( result2 );
 });
 
 
@@ -113,5 +128,7 @@ const result3 = {
 };
 
 test('AddDeps - Should highlight breaking dependencies', () => {
-	expect( AddDeps( dependencies3, installed3, 20 ) ).toMatchObject( result3 );
+	const rendered = AddDeps( dependencies3, installed3, 20 );
+	rendered.lines = normaliseLines( rendered.lines );
+	expect( rendered ).toMatchObject( result3 );
 });
