@@ -7,7 +7,7 @@ Pancake
 
 > **Legacy scope:** Releases published before the `@truecms/*` migration remain available under the archived `@gov.au/*` namespace for teams who still depend on them. New work happens exclusively in the `@truecms` scope.
 
-![CI](https://github.com/govau/pancake/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/truecms/pancake/actions/workflows/ci.yml/badge.svg)
 
 ![The Pancake tool](https://raw.githubusercontent.com/govau/pancake/master/assets/pancake.png)
 
@@ -21,6 +21,7 @@ Pancake will check your `"peerDependencies"` for conflicts and comes with plugin
 
 * [Getting started](#getting-started)
 * [Requirements](#requirements)
+* [Migration guidance](#migration-guidance)
 * [Settings](#settings)
 * [Command line interface](#cli)
 * [Creating your own Pancake modules](#creating-your-own-pancake-modules)
@@ -54,6 +55,20 @@ If you have issues with using SASS globals in a ReactJS project, please check ou
 - A `package.json` file in your root (run `npm init --yes`)
 
 _Pancake alone does not come with any dependencies while all plugins have fixed dependencies to specific versions to keep the security impact as low as possible. We also ship a `package-lock.json` file._
+
+
+**[⬆ back to top](#contents)**
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+## Migration guidance
+
+- Follow the end-to-end upgrade checklist in [`MIGRATION.md`](MIGRATION.md) when moving from the legacy `@gov.au/*` packages to the modernised `@truecms/*` scope.
+- Review supported runtimes and deprecation dates in [`docs/node-support-policy.md`](docs/node-support-policy.md).
+- Validate environments with `pnpm run install:check` (deterministic install/build gate) and the GitHub Actions workflows in `.github/workflows/ci.yml` and `.github/workflows/release.yml`.
+- Use the announcement template at [`docs/announcements/truecms-upgrade.md`](docs/announcements/truecms-upgrade.md) to communicate adoption timelines across teams.
 
 
 **[⬆ back to top](#contents)**

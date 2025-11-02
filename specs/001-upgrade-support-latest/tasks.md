@@ -120,11 +120,11 @@
 
 ### Implementation for User Story 5
 
-- [ ] T028 [US5] Author `MIGRATION.md` with step-by-step upgrade instructions, including dependency updates, install-check usage, and validation checklist.
-- [ ] T029 [P] [US5] Refresh `README.md` and `AGENTS.md` with migration highlights, updated npm scope references, and pointers to the install-check + CI workflows.
-- [ ] T030 [US5] Create `docs/node-support-policy.md` detailing supported Node versions, deprecation timelines for Node 20, and escalation paths for lagging teams.
-- [ ] T031 [P] [US5] Update `specs/001-upgrade-support-latest/checklists/package-docs.md` to track per-package README/CHANGELOG updates required before release sign-off.
-- [ ] T032 [US5] Produce communication template `docs/announcements/truecms-upgrade.md` covering release summary, testing expectations, and contact channels for downstream teams.
+- [x] T028 [US5] Author `MIGRATION.md` with step-by-step upgrade instructions, including dependency updates, install-check usage, and validation checklist.
+- [x] T029 [P] [US5] Refresh `README.md` and `AGENTS.md` with migration highlights, updated npm scope references, and pointers to the install-check + CI workflows.
+- [x] T030 [US5] Create `docs/node-support-policy.md` detailing supported Node versions, deprecation timelines for Node 20, and escalation paths for lagging teams.
+- [x] T031 [P] [US5] Update `specs/001-upgrade-support-latest/checklists/package-docs.md` to track per-package README/CHANGELOG updates required before release sign-off.
+- [x] T032 [US5] Produce communication template `docs/announcements/truecms-upgrade.md` covering release summary, testing expectations, and contact channels for downstream teams.
 
 **Checkpoint**: Migration documentation validated via sample upgrade and communication artefacts ready for distribution.
 
