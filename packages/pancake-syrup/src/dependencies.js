@@ -16,13 +16,12 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const StripAnsi = require( 'strip-ansi' );
 const Inquirer = require( 'inquirer' );
-const Request = require( 'request' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Module imports
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const { Log, Style, Semver } = require( '@gov.au/pancake' );
+const { Log, Style, Semver } = require( '@truecms/pancake' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -67,14 +66,13 @@ module.exports.AddDeps = ( dependencies, installed, longestName ) => {
 		}
 
 		//new lines have to be inside a Separator. Bug launched here: https://github.com/SBoudrias/Inquirer.js/issues/494
+		const prefix = `${ i >= Object.keys( dependencies ).length ? '└──' : '├──' } `;
+		const padding = `${ ' '.repeat( longestName - StripAnsi( name ).length ) }`;
+		const suffix = installedModule !== undefined ? '   installed' : '';
+		const content = `${ prefix }${ name } ${ padding }${ version }${ suffix }`;
+
 		lines.push(
-			new Inquirer.Separator(
-				`${ i >= Object.keys( dependencies ).length ? '└──' : '├──' } ` +
-				`${ name } ` +
-				`${ ' '.repeat( longestName - StripAnsi( name ).length ) }` +
-				`${ version }` +
-				`${ installedModule !== undefined ? '   installed' : '' }`
-			)
+			new Inquirer.Separator(`\u001b[2m${ content }\u001b[22m`)
 		);
 	}
 

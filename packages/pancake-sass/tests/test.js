@@ -1,4 +1,4 @@
-const Pancake = require('@gov.au/pancake');
+const Pancake = require('@truecms/pancake');
 const Plugin = require('./../lib/pancake');
 
 Pancake.Batter([

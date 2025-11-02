@@ -3,6 +3,8 @@ Pancake
 
 > Pancake is a tool to make working with npm on the front end easy and sweet.
 
+> **Legacy scope:** Versions published before the migration remain on the archived `@gov.au/*` namespace. All active releases and support now live under `@truecms/*`.
+
 
 ## Contents
 
@@ -20,11 +22,11 @@ Pancake
 
 
 ```shell
-yarn add @gov.au/pancake
+yarn add @truecms/pancake
 ```
 
 ```shell
-npm install @gov.au/pancake --save-dev
+npm install @truecms/pancake --save-dev
 ```
 
 

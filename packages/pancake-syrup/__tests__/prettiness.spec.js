@@ -5,9 +5,20 @@
  * @file - pancake-syrup/src/prettiness.js
  *
  **************************************************************************************************************************************************************/
-
+if( !process.env.FORCE_COLOR ) {
+	process.env.FORCE_COLOR = '3';
+}
 
 const { HighlightDiff, Headline } = require( '../src/prettiness' );
+
+const cleanAnsi = line => line
+	.replace(/\u001b\[2m(?=\u001b\[2m)/g, '')
+	.replace(/\u001b\[2m(?=\u001b\[22m)/g, '' );
+
+const normaliseSeparators = data => data.map( item => ( {
+	type: item.type,
+	line: cleanAnsi( item.line ),
+} ) );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,7 +60,7 @@ const headline1 = [
 ];
 
 test('Headline - Should output the correct array with the correct ansi codes', () => {
-	expect( Headline( 'Headline', 'Subline', 20 ) ).toMatchObject( headline1 );
+	expect( normaliseSeparators( Headline( 'Headline', 'Subline', 20 ) ) ).toEqual( headline1 );
 });
 
 
@@ -69,7 +80,7 @@ const headline2 = [
 ];
 
 test('Headline - Should output the correct center alignment', () => {
-	expect( Headline( 'Headline', 'Subline', 30 ) ).toMatchObject( headline2 );
+	expect( normaliseSeparators( Headline( 'Headline', 'Subline', 30 ) ) ).toEqual( headline2 );
 });
 
 
@@ -89,5 +100,5 @@ const headline3 = [
 ];
 
 test(`Headline - Should build a headline even with a smaller table than the headline`, () => {
-	expect( Headline( 'Headline', 'Subline', 5 ) ).toMatchObject( headline3 );
+	expect( normaliseSeparators( Headline( 'Headline', 'Subline', 5 ) ) ).toEqual( headline3 );
 });

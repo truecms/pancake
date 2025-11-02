@@ -1,7 +1,8 @@
 {
-	"name": "@gov.au/syrup",
-	"version": "1.2.0",
+	"name": "@truecms/syrup",
+	"version": "2.0.0",
 	"description": "Syrup helps you select the right pancake modules.",
+	"packageManager": "pnpm@8.15.9",
 	"keywords": [
 		"npm",
 		"flat",
@@ -15,18 +16,20 @@
 		"pancake-plugin"
 	],
 	"engines": {
-		"npm": ">=6.0.0"
+		"node": ">=22",
+		"npm": ">=10"
 	},
 	"main": "./dist/syrup.js",
 	"bin": {
 		"syrup": "./bin/syrup"
 	},
 	"scripts": {
-		"prepublish": "npm run build && npm run test",
-		"build": "npm run build:js",
-		"build:watch": "npm run build:js && jest --coverage",
-		"build:js": "babel src --out-dir dist",
-		"watch": "npm run build:watch && onchange 'src/*.js' '__tests__/*.js' -- npm run build:watch"
+		"prepublish": "pnpm run build && pnpm run test",
+		"build": "pnpm run build:js",
+		"build:watch": "pnpm run build:js && pnpm exec jest --coverage",
+		"build:js": "pnpm exec babel src --out-dir dist",
+		"test": "pnpm -w run test:unit-test",
+		"watch": "pnpm run build:watch && pnpm exec onchange 'src/*.js' '__tests__/*.js' -- pnpm run build:watch"
 	},
 	"jest": {
 		"testEnvironment": "node",
@@ -49,9 +52,9 @@
 		"settings.json"
 	],
 	"dependencies": {
-		"@gov.au/pancake": "~1",
+		"@truecms/pancake": "~2.0.0",
+		"@cypress/request": "^3.0.9",
 		"inquirer": "6.2.2",
-		"request": "^2.88.0",
 		"strip-ansi": "5.1.0"
 	},
 	"devDependencies": {

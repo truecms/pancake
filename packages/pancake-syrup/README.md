@@ -22,11 +22,11 @@ Syrup
 
 
 ```shell
-yarn add @gov.au/syrup
+yarn add @truecms/syrup
 ```
 
 ```shell
-npm install @gov.au/syrup --save-dev
+npm install @truecms/syrup --save-dev
 ```
 
 

@@ -1,66 +1,66 @@
 {
-	"@gov.au/body": {
-		"name": "@gov.au/body",
+	"@truecms/body": {
+		"name": "@truecms/body",
 		"version": "0.0.2",
 		"peerDependencies": {
-			"@gov.au/core": "^0.1.0"
+			"@truecms/core": "^0.1.0"
 		}
 	},
-	"@gov.au/breadcrumbs": {
-		"name": "@gov.au/breadcrumbs",
+	"@truecms/breadcrumbs": {
+		"name": "@truecms/breadcrumbs",
 		"version": "0.1.0",
 		"peerDependencies": {
-			"@gov.au/core": "^0.1.0",
-			"@gov.au/link-lists": "^0.1.0"
+			"@truecms/core": "^0.1.0",
+			"@truecms/link-lists": "^0.1.0"
 		}
 	},
-	"@gov.au/core": {
-		"name": "@gov.au/core",
+	"@truecms/core": {
+		"name": "@truecms/core",
 		"version": "0.1.0",
 		"peerDependencies": {}
 	},
-	"@gov.au/footer": {
-		"name": "@gov.au/footer",
+	"@truecms/footer": {
+		"name": "@truecms/footer",
 		"version": "0.1.0",
 		"peerDependencies": {
-			"@gov.au/core": "^0.1.0",
-			"@gov.au/body": "^0.1.0"
+			"@truecms/core": "^0.1.0",
+			"@truecms/body": "^0.1.0"
 		}
 	},
-	"@gov.au/grid-12": {
-		"name": "@gov.au/grid-12",
+	"@truecms/grid-12": {
+		"name": "@truecms/grid-12",
 		"version": "0.1.0",
 		"peerDependencies": {
-			"@gov.au/core": "^0.1.0"
+			"@truecms/core": "^0.1.0"
 		}
 	},
-	"@gov.au/headings": {
-		"name": "@gov.au/headings",
+	"@truecms/headings": {
+		"name": "@truecms/headings",
 		"version": "1.1.0",
 		"peerDependencies": {
-			"@gov.au/core": "^0.1.0"
+			"@truecms/core": "^0.1.0"
 		}
 	},
-	"@gov.au/link-lists": {
-		"name": "@gov.au/link-lists",
+	"@truecms/link-lists": {
+		"name": "@truecms/link-lists",
 		"version": "0.2.3",
 		"peerDependencies": {
-			"@gov.au/core": "^1.0.0",
-			"@gov.au/body": "^0.1.0"
+			"@truecms/core": "^1.0.0",
+			"@truecms/body": "^0.1.0"
 		}
 	},
-	"@gov.au/responsive-embeds": {
-		"name": "@gov.au/responsive-embeds",
+	"@truecms/responsive-embeds": {
+		"name": "@truecms/responsive-embeds",
 		"version": "0.1.0",
 		"peerDependencies": {
-			"@gov.au/core": "^0.1.0"
+			"@truecms/core": "^0.1.0"
 		}
 	},
-	"@gov.au/skip-links": {
-		"name": "@gov.au/skip-links",
+	"@truecms/skip-links": {
+		"name": "@truecms/skip-links",
 		"version": "0.1.0",
 		"peerDependencies": {
-			"@gov.au/core": "^0.1.0"
+			"@truecms/core": "^0.1.0"
 		}
 	}
 }

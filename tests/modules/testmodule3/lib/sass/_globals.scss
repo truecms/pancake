@@ -1,4 +1,4 @@
-/*! @gov.au/testmodule3 v15.0.0-next.1 */
+/*! @truecms/testmodule3 v15.0.0-next.1 */
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // testmodule3 module globals
@@ -11,11 +11,11 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // SASS VERSIONING
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-$name: "@gov.au/testmodule3";
+$name: "@truecms/testmodule3";
 $version: "15.0.0-next.1";
 $dependencies: (
-	("@gov.au/testmodule1", "15.0.0-next.1"),
-	("@gov.au/testmodule2", "19.0.0-next.1"),
+	("@truecms/testmodule1", "15.0.0-next.1"),
+	("@truecms/testmodule2", "19.0.0-next.1"),
 );
 
 @include versioning-add( $name, $version, $dependencies ); //adding dependencies to global scope

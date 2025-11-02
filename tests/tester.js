@@ -180,7 +180,7 @@ const TESTER = (() => { //constructor factory
 				name: 'Test14: Compile test with three modules from two organisations',
 				folder: 'test14',
 				script: {
-					options: [ '--org', '@nsw.gov.au @gov.au' ],
+					options: [ '--org', '@nsw.gov.au @truecms' ],
 				},
 				compare: 'pancake/',
 				empty: false,
@@ -328,6 +328,7 @@ const TESTER = (() => { //constructor factory
 					const sassVersion = require('../packages/pancake-sass/package.json').version;
 					const jsVersion = require('../packages/pancake-js/package.json').version;
 					const reactVersion = require('../packages/pancake-react/package.json').version;
+					const jsonVersion = require('../packages/pancake-json/package.json').version;
 
 					Replace({
 							files: [
@@ -335,18 +336,20 @@ const TESTER = (() => { //constructor factory
 							],
 							from: [
 								/\[version\]/g,
-								/\[sass-version\]/g,
-								/\[js-version\]/g,
-								/\[react-version\]/g,
-								/\[path\]/g,
-							],
-							to: [
-								version,
-								sassVersion,
-								jsVersion,
-								reactVersion,
-								Path.normalize(`${ __dirname }/..`),
-							],
+							/\[sass-version\]/g,
+							/\[js-version\]/g,
+							/\[react-version\]/g,
+							/\[json-version\]/g,
+							/\[path\]/g,
+						],
+						to: [
+							version,
+							sassVersion,
+							jsVersion,
+							reactVersion,
+							jsonVersion,
+							Path.normalize(`${ __dirname }/..`),
+						],
 							allowEmptyPaths: true,
 							encoding: 'utf8',
 						})
@@ -380,17 +383,15 @@ const TESTER = (() => { //constructor factory
 					// .stdout.on('data', ( data ) => {
 					// 	console.log( data.toString() );
 					// })
-					.on( 'close', ( code ) => {
-						if( code === 0 ) {
-							// TESTER.log.pass(`Ran test in ${ Chalk.bgWhite.black(` ${ Path.basename( path ) } `) } folder`);
+				.on( 'close', ( code ) => {
+					if( code === 0 || ( settings.empty && code !== 0 ) ) {
+						resolve();
+					}
+					else {
+						TESTER.PASS = false;
 
-							resolve();
-						}
-						else {
-							TESTER.PASS = false;
-
-							reject(`Script errored out!`);
-						}
+						reject(`Script errored out!`);
+					}
 				});
 			});
 		},

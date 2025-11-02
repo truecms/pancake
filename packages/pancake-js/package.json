@@ -1,7 +1,8 @@
 {
-	"name": "@gov.au/pancake-js",
-	"version": "1.2.1",
+	"name": "@truecms/pancake-js",
+	"version": "2.0.0",
 	"description": "A Pancake plugin to minify js files.",
+	"packageManager": "pnpm@8.15.9",
 	"keywords": [
 		"npm",
 		"flat",
@@ -15,15 +16,17 @@
 		"pancake-plugin"
 	],
 	"engines": {
-		"npm": ">=6.0.0"
+		"node": ">=22",
+		"npm": ">=10"
 	},
 	"main": "./lib/pancake.js",
 	"scripts": {
-		"prepublish": "npm run build && npm run test",
-		"build": "npm run build:js",
-		"build:watch": "npm run build:js && jest --coverage",
-		"build:js": "babel src --out-dir lib",
-		"watch": "npm run build:watch && onchange 'src/*.js' '__tests__/*.js' -- npm run build:watch"
+		"prepublish": "pnpm run build && pnpm run test",
+		"build": "pnpm run build:js",
+		"build:watch": "pnpm run build:js && pnpm exec jest --coverage",
+		"build:js": "pnpm exec babel src --out-dir lib",
+		"test": "pnpm -w run test:unit-test",
+		"watch": "pnpm run build:watch && pnpm exec onchange 'src/*.js' '__tests__/*.js' -- pnpm run build:watch"
 	},
 	"jest": {
 		"testEnvironment": "node",
@@ -44,8 +47,8 @@
 		"lib/*"
 	],
 	"dependencies": {
-		"@gov.au/pancake": "~1",
-		"uglify-js": "3.4.9"
+		"@truecms/pancake": "~2.0.0",
+		"esbuild": "^0.25.0"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.2.3",

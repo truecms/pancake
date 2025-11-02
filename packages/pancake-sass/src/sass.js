@@ -16,13 +16,63 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const Autoprefixer = require( 'autoprefixer' );
 const Postcss = require( 'postcss' );
-const Sass = require( 'node-sass' );
+const Sass = require( 'sass' );
 const Path = require( 'path' );
+const Fs = require( 'fs' );
+const { pathToFileURL, fileURLToPath } = require( 'url' );
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Included modules
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const { Log, Style, WriteFile } = require( '@gov.au/pancake' );
+const { Log, Style, WriteFile } = require( '@truecms/pancake' );
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Sass helpers
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+const createFileImporter = () => ({
+	canonicalize( url ) {
+		if( typeof url !== 'string' ) {
+			return null;
+		}
+
+		if( url.startsWith( 'file:' ) ) {
+			return new URL( url );
+		}
+
+		if( Path.isAbsolute( url ) ) {
+			return pathToFileURL( url );
+		}
+
+		return null;
+	},
+	load( canonicalUrl ) {
+		const filePath = fileURLToPath( canonicalUrl );
+		const contents = Fs.readFileSync( filePath, 'utf8' );
+
+		return {
+			contents,
+			syntax: 'scss',
+			sourceMapUrl: canonicalUrl,
+		};
+	},
+});
+
+const resolveBrowserslist = settings => {
+	if( !settings || typeof settings !== 'object' ) {
+		return null;
+	}
+
+	if( Array.isArray( settings.browserslist ) && settings.browserslist.length > 0 ) {
+		return settings.browserslist;
+	}
+
+	if( Array.isArray( settings.browsers ) && settings.browsers.length > 0 ) {
+		return settings.browsers;
+	}
+
+	return null;
+};
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -152,46 +202,71 @@ module.exports.GenerateSass = ( location, name, modules, npmOrg ) => {
  *
  * @return {promise object}  - Boolean true for 👍 || string error for 👎
  */
-module.exports.Sassify = ( location, settings, sass ) => {
-	return new Promise( ( resolve, reject ) => {
-		const compiled = Sass.render({
-			data: sass,
-			indentType: 'tab', //this is how real developers indent!
-			outputStyle: settings.minified ? 'compressed' : 'expanded',
-		}, ( error, generated ) => {
-			if( error ) {
-				Log.error(`Sass compile failed for ${ Style.yellow( location ) }`);
+module.exports.Sassify = async ( location, settings, sass ) => {
+	try {
+		const shouldWriteSourceMap = Boolean( settings.sourcemap );
+		const compileOptions = {
+			style: settings.minified ? 'compressed' : 'expanded',
+			importers: [ createFileImporter() ],
+		};
 
-				reject( error.message );
-			}
-			else {
-				Log.verbose(`Sass: Successfully compiled Sass for ${ Style.yellow( location ) }`);
+		if( shouldWriteSourceMap ) {
+			compileOptions.sourceMap = true;
+			compileOptions.sourceMapIncludeSources = true;
+		}
 
-				Postcss([ Autoprefixer({ browsers: settings.browsers }) ])
-					.process( generated.css )
-					.catch( error => reject( error ) )
-					.then( ( prefixed ) => {
-						if( prefixed ) {
-							prefixed
-								.warnings()
-								.forEach( warn => Log.error( warn.toString() ) );
+		const generated = await Sass.compileStringAsync( sass, compileOptions );
 
-							Log.verbose(`Sass: Successfully autoprefixed CSS for ${ Style.yellow( location ) }`);
+		Log.verbose(`Sass: Successfully compiled Sass for ${ Style.yellow( location ) }`);
 
-							WriteFile( location, prefixed.css ) //write the generated content to file and return its promise
-								.catch( error => {
-									Log.error( error );
+		const postcssOptions = {
+			from: location,
+			to: location,
+		};
 
-									reject( error );
-								})
-								.then( () => {
-									resolve( true );
-							});
-						}
-				});
-			}
-		});
-	});
+		if( shouldWriteSourceMap && generated.sourceMap ) {
+			const previousMap = typeof generated.sourceMap === 'string'
+				? generated.sourceMap
+				: JSON.stringify( generated.sourceMap ); // dart-sass returns a plain object when sourcemaps are enabled
+
+			postcssOptions.map = {
+				prev: previousMap,
+				inline: false,
+				annotation: false,
+				sourcesContent: true,
+			};
+		}
+		else {
+			postcssOptions.map = false;
+		}
+
+		const browserslist = resolveBrowserslist( settings );
+		const autoprefixerPlugin = browserslist
+			? Autoprefixer({ overrideBrowserslist: browserslist })
+			: Autoprefixer();
+		const prefixed = await Postcss([ autoprefixerPlugin ]).process( generated.css, postcssOptions );
+
+		prefixed
+			.warnings()
+			.forEach( warn => Log.error( warn.toString() ) );
+
+		Log.verbose(`Sass: Successfully autoprefixed CSS for ${ Style.yellow( location ) }`);
+
+		await WriteFile( location, prefixed.css );
+
+		if( shouldWriteSourceMap && prefixed.map ) {
+			const mapLocation = `${ location }.map`;
+			await WriteFile( mapLocation, prefixed.map.toString() );
+			Log.verbose(`Sass: Wrote sourcemap for ${ Style.yellow( location ) } to ${ Style.yellow( mapLocation ) }`);
+		}
+
+		return true;
+	}
+	catch( error ) {
+		Log.error(`Sass compile failed for ${ Style.yellow( location ) }`);
+
+		throw ( error && error.message ) ? error.message : error;
+	}
 };
 
 module.exports.GetDependencies = GetDependencies;

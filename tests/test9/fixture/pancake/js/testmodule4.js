@@ -1,1 +1,2 @@
-/*! @gov.au/testmodule4 v11.0.0 */confirm("testmodule4:v11.0.0");
+/*! @truecms/testmodule4 v11.0.0 */
+confirm("testmodule4:v11.0.0");

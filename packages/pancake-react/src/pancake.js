@@ -23,7 +23,7 @@ const Fs = require( 'fs' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Module imports
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const { Log, Style, Loading, ReadFile, WriteFile } = require( '@gov.au/pancake' );
+const { Log, Style, Loading, ReadFile, WriteFile } = require( '@truecms/pancake' );
 const { HandleReact } = require( './react' );
 
 Log.output = true; //this plugin assumes you run it through pancake
@@ -110,13 +110,19 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 					reactModulePath = Path.normalize(`${ modulePackage.path }/${ modulePackage.pancake['pancake-module'].react.path }`);
 				}
 
-				if( !Fs.existsSync( reactModulePath ) ) {
+				if( !reactModulePath || !Fs.existsSync( reactModulePath ) ) {
 					Log.verbose(`React: No React found in ${ Style.yellow( reactModulePath ) }`)
 				}
 				else {
 					Log.verbose(`React: ${ Style.green('⌘') } Found React files in ${ Style.yellow( reactModulePath ) }`);
 
-					const reactModuleToPath = Path.normalize(`${ cwd }/${ SETTINGS.react.location }/${ modulePackage.name.split('/')[ 1 ] }.js`);
+					const moduleNameParts = typeof modulePackage.name === 'string' ? modulePackage.name.split( '/' ) : [];
+					const moduleBasenameCandidate = moduleNameParts.length > 1 ? moduleNameParts[ 1 ] : moduleNameParts[ 0 ];
+					const moduleBasename = moduleBasenameCandidate && moduleBasenameCandidate.length > 0 ? moduleBasenameCandidate : 'module';
+					const sourceExt = Path.extname( reactModulePath ) || '.js';
+					const reactModuleToPath = Path.normalize(
+						Path.join( cwd, SETTINGS.react.location, `${ moduleBasename }${ sourceExt }` )
+					);
 
 					//move react file depending on settings
 					const reactPromise = HandleReact( reactModulePath, reactModuleToPath, `${ modulePackage.name } v${ modulePackage.version }` )

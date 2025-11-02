@@ -20,11 +20,11 @@ Pancake JS plugin
 
 
 ```shell
-yarn add @gov.au/pancake
+yarn add @truecms/pancake
 ```
 
 ```shell
-npm install @gov.au/pancake --save-dev
+npm install @truecms/pancake --save-dev
 ```
 
 

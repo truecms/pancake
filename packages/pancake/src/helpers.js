@@ -23,7 +23,7 @@ const OS = require( 'os' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Module imports
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const { Log, Style } = require( './logging' );
+const { Log, Style } = require( './log' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -266,21 +266,36 @@ const Spawning = {
  * @param {object} error   - Object to distinguish between closing events
  */
 module.exports.ExitHandler = ( exiting, error ) => {
-	if( error && error !== 1 ) {
-		try { //try using our pretty output
+	let exitCodeFromEvent = 0;
+	const isErrorObject = error instanceof Error;
+
+	if( isErrorObject ) {
+		try {
 			Log.error( error );
 		}
-		catch( error ) { //looks like it’s broken too so let’s just do the old school thing
+		catch( loggingFailure ) {
 			console.error( error );
 		}
+
+		exitCodeFromEvent = 1;
+	}
+	else if( typeof error === 'number' ) {
+		exitCodeFromEvent = error;
+	}
+	else if( typeof error === 'string' && error.length ) {
+		exitCodeFromEvent = 1;
 	}
 
-	if( exiting.withoutSpace ) {
-		process.exit( 0 ); //exit now
+	const logExit = typeof Log.getExitCode === 'function' ? Log.getExitCode() : ( Log.hasError ? 1 : 0 );
+	const finalExitCode = logExit || exitCodeFromEvent;
+
+	if( exiting.withoutSpace !== true && Log.mode === 'pretty' && Log.output ) {
+		Log.space();
 	}
 
-	Log.space();     //adding some space
-	process.exit( 0 ); //now exit with a smile :)
+	if( finalExitCode > 0 ) {
+		process.exitCode = finalExitCode;
+	}
 };
 
 module.exports.Spawning = Spawning;

@@ -23,7 +23,28 @@ const Fs = require( 'fs' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Module imports
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const { Log, Style, Loading, ReadFile, WriteFile } = require( '@gov.au/pancake' );
+const { Log, Style, Loading, ReadFile, WriteFile } = require( '@truecms/pancake' );
+
+const SCHEMA_VERSION = '1.0.0';
+
+const getPackageVersion = ( name, basePaths ) => {
+	for( const basePath of basePaths ) {
+		try {
+			const packageJson = require( Path.join( basePath, 'node_modules', name, 'package.json' ) );
+			return packageJson.version;
+		}
+		catch( error ) {
+			// ignore resolution errors and fall back to next candidate path
+		}
+	}
+
+	try {
+		return require( `${ name }/package.json` ).version;
+	}
+	catch( error ) {
+		return null;
+	}
+};
 
 Log.output = true; //this plugin assumes you run it through pancake
 
@@ -108,7 +129,8 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Promise loop
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-		const JSONOutput = {};
+	const JSONOutput = {};
+	const discoveredPlugins = new Set();
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -119,6 +141,13 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 				Log.verbose(`JSON: Building ${ Style.yellow( modulePackage.name ) }`);
 
 				JSONOutput[ modulePackage.name ] = {};
+
+				const moduleSettings = modulePackage.pancake && modulePackage.pancake['pancake-module'];
+				if( moduleSettings && Array.isArray( moduleSettings.plugins ) ) {
+					for( const pluginName of moduleSettings.plugins ) {
+						discoveredPlugins.add( pluginName );
+					}
+				}
 
 				if( SETTINGS.json.content.name ) {
 					JSONOutput[ modulePackage.name ].name = modulePackage.name;
@@ -141,8 +170,27 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 				}
 			}
 
+			discoveredPlugins.add( '@truecms/pancake-json' );
+			discoveredPlugins.add( '@truecms/pancake' );
+
 			if( Object.keys( JSONOutput ).length > 0 ) {
 				const jsonPath = Path.normalize(`${ cwd }/${ SETTINGS.json.location }/${ SETTINGS.json.name }.json`);
+				const basePaths = [ cwd, Path.resolve( cwd, '..' ), __dirname, Path.resolve( __dirname, '..' ) ];
+				const pluginVersions = {};
+
+				for( const pluginName of discoveredPlugins ) {
+					const pluginVersion = getPackageVersion( pluginName, basePaths );
+
+					if( pluginVersion ) {
+						pluginVersions[ pluginName ] = pluginVersion;
+					}
+				}
+
+				JSONOutput._meta = {
+					schemaVersion: SCHEMA_VERSION,
+					pancakeVersion: version,
+					plugins: pluginVersions,
+				};
 
 				WriteFile( jsonPath, JSON.stringify( JSONOutput ) ) //write the generated content to file and return its promise
 					.catch( error => {

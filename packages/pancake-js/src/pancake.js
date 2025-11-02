@@ -23,7 +23,7 @@ const Fs = require( 'fs' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Module imports
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const { Log, Style, Loading, ReadFile, WriteFile } = require( '@gov.au/pancake' );
+const { Log, Style, Loading, ReadFile, WriteFile } = require( '@truecms/pancake' );
 const { HandleJS, MinifyAllJS } = require('./js' );
 
 Log.output = true; //this plugin assumes you run it through pancake
@@ -54,6 +54,7 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 		js: {
 			minified: true,
 			modules: false,
+			sourcemap: false,
 			location: 'pancake/js/',
 			name: 'pancake.min.js',
 		},
@@ -97,7 +98,7 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Settings
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-		let compiledAll = []; //for collect all promises
+		const modulePromises = []; //for collect all promises
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -126,7 +127,7 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 						Log.error( error );
 				});
 
-				compiledAll.push( jsPromise ); //collect all js promises so we can save the SETTINGS.js.name file later
+				modulePromises.push( jsPromise ); //collect all js promises so we can save the SETTINGS.js.name file later
 			}
 		}
 
@@ -139,18 +140,20 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 		}
 		else {
 
-			//write SETTINGS.js.name file
+			const tasks = modulePromises.slice();
+
 			if( SETTINGS.js.name !== false ) {
-				compiledAll.push(
-					MinifyAllJS( version, compiledAll, SETTINGS.js, cwd )
+				tasks.push(
+					Promise.all( modulePromises )
+						.then( outputs => MinifyAllJS( version, outputs, SETTINGS.js, cwd ) )
 						.catch( error => {
 							Log.error( error );
-					})
+						})
 				);
 			}
 
 			//after all files have been compiled and written
-			Promise.all( compiledAll )
+			Promise.all( tasks )
 				.catch( error => {
 					Loading.stop( 'pancake-js', Log.verboseMode ); //stop loading animation
 

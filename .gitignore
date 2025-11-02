@@ -11,6 +11,7 @@ validation-status.json
 npm-debug.log
 yarn-error.log
 lerna-debug.log
+pnpm-debug.log*
 dist/
 lib/
 _fixture/
@@ -23,4 +24,15 @@ tests/*/testfolder/
 !tests/*/node_modules/*/*/lib/
 !tests/*/node_modules/*/dist/
 !tests/modules/*/lib/
+tests/fixtures/design-system-components/
 coverage/
+build/
+*.log
+*.log*
+.env*
+Thumbs.db
+*.tmp
+.tmp/
+*.swp
+.vscode/
+.local/

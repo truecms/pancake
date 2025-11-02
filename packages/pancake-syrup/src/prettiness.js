@@ -20,7 +20,7 @@ const Inquirer = require('inquirer' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Exports
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const { Log, Style, Semver } = require( '@gov.au/pancake' );
+const { Log, Style, Semver } = require( '@truecms/pancake' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,15 +80,20 @@ module.exports.Headline = ( headline, subline = '', longestName ) => {
 		sideSubline = 0;
 	}
 
+	const headlineContent = `\u001b[2m` +
+		`\u001b[0m\u001b[44m\u001b[1m\u001b[36m` +
+		`  ═${ '═'.repeat( Math.ceil( sideHeader ) ) }╡ ${ headline } ╞${ '═'.repeat( Math.floor( sideHeader ) ) }═  ` +
+		`\u001b[39m` +
+		`\u001b[2m\u001b[49m\u001b[0m` +
+		`\u001b[22m`;
+
+	const sublineContent = subline.length > 0
+		? `\u001b[2m${ ' '.repeat( Math.floor( sideSubline ) ) }\u001b[0m${ Style.cyan( subline ) }\u001b[0m\u001b[22m`
+		: '';
+
 	return [
-		new Inquirer.Separator(` `),
-		new Inquirer.Separator(
-			`\u001b[0m\u001b[44m\u001b[1m\u001b[36m` +
-			`  ═${ '═'.repeat( Math.ceil( sideHeader ) ) }╡ ${ headline } ╞${ '═'.repeat( Math.floor( sideHeader ) ) }═  ` +
-			`\u001b[39m\u001b[22m\u001b[49m\u001b[0m`
-		),
-		new Inquirer.Separator(
-			`${ subline.length > 0 ? `${ ' '.repeat( Math.floor( sideSubline ) ) }\u001b[0m${ Style.cyan( subline ) }\u001b[0m` : `` }`
-		),
+		new Inquirer.Separator('\u001b[2m \u001b[22m'),
+		new Inquirer.Separator( headlineContent ),
+		new Inquirer.Separator( sublineContent ),
 	];
 };

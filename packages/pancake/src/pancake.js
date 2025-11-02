@@ -18,6 +18,7 @@
 // Dependencies
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const Path = require( 'path' );
+const Fs = require( 'fs' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -25,12 +26,61 @@ const Path = require( 'path' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const { GetFolders, CreateDir, WriteFile, ReadFile, CopyFile } = require('./files' );
 const { ExitHandler, CheckNPM, Cwd, Size, Spawning } = require('./helpers' );
-const { Log, Style, Loading } = require('./logging' );
+const { Log, Style, Loading } = require('./log' );
 const { ParseArgs } = require('./parse-arguments' );
 const { CheckModules } = require( './conflicts' );
 const { GetModules } = require( './modules' );
 const { Settings } = require( './settings' );
 const Semver = require( './semver-5-3-0' );
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Lockfile discovery helpers
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------
+const LOCKFILE_CANDIDATES = [
+	{ filename: 'pnpm-lock.yaml', manager: 'pnpm' },
+	{ filename: 'package-lock.json', manager: 'npm' },
+];
+
+const ResolveLockfile = ( cwd = process.cwd() ) => {
+	if( typeof cwd !== 'string' || cwd.length === 0 ) {
+		return null;
+	}
+
+	const basePath = Path.resolve( cwd );
+
+	for( const candidate of LOCKFILE_CANDIDATES ) {
+		const candidatePath = Path.join( basePath, candidate.filename );
+
+		if( Fs.existsSync( candidatePath ) ) {
+			return {
+				manager: candidate.manager,
+				path: candidatePath,
+				filename: candidate.filename,
+			};
+		}
+	}
+
+	return null;
+};
+
+const RecommendInstallCommand = ( lockInfo, packages = [] ) => {
+	if( !Array.isArray( packages ) || packages.length === 0 ) {
+		return '';
+	}
+
+	const packageList = packages.join( ' ' );
+
+	if( lockInfo && lockInfo.manager === 'pnpm' ) {
+		return `pnpm add ${ packageList }`;
+	}
+
+	if( lockInfo && lockInfo.manager === 'npm' ) {
+		return `npm install ${ packageList } --save`;
+	}
+
+	return `npm install ${ packageList } --save`;
+};
 
 
 module.exports = { //here, take a sword; for you may need it
@@ -52,6 +102,8 @@ module.exports = { //here, take a sword; for you may need it
 	ReadFile,
 	CopyFile,
 	Semver,
+	ResolveLockfile,
+	RecommendInstallCommand,
 };
 
 
@@ -91,6 +143,14 @@ module.exports.Batter = ( argv = process.argv ) => {
 
 	// Finding the current working directory
 	const pkgPath = Cwd( ARGS.cwd );
+	const lockfile = ResolveLockfile( pkgPath );
+
+	if( lockfile ) {
+		Log.verbose(`Detected lockfile ${ Style.yellow( lockfile.filename ) } for ${ Style.yellow( lockfile.manager ) } in ${ Style.yellow( pkgPath ) }`);
+	}
+	else {
+		Log.verbose(`No lockfile detected in ${ Style.yellow( pkgPath ) }`);
+	}
 
 	// Get local settings
 	let SETTINGSlocal = Settings.GetLocal( pkgPath );
@@ -98,12 +158,12 @@ module.exports.Batter = ( argv = process.argv ) => {
 	// Get all modules data
 	return new Promise( ( resolve, reject ) => {
 
-		GetModules( pkgPath, SETTINGS.npmOrg )
-			.catch( error => {
-				reject(`Reading all package.json files bumped into an error: ${ error }`);
-				reject( error );
-			})
-			.then( allModules => { //once we got all the content from all package.json files
+GetModules( pkgPath, SETTINGS.npmOrg )
+		.catch( error => {
+			reject(`Reading all package.json files bumped into an error: ${ error }`);
+			reject( error );
+		})
+		.then( allModules => { //once we got all the content from all package.json files
 				Log.verbose(`Gathered all modules:\n${ Style.yellow( JSON.stringify( allModules ) ) }`);
 
 				if( allModules.length > 0 ) {
@@ -113,25 +173,27 @@ module.exports.Batter = ( argv = process.argv ) => {
 						reject( conflicts );
 					}
 					else {
-						resolve({
-							version: pkg.version,
-							modules: allModules,
-							settings: SETTINGSlocal,
-							globalSettings: SETTINGS,
-							cwd: pkgPath,
-						});
-					}
-				}
-				else {
 					resolve({
 						version: pkg.version,
 						modules: allModules,
 						settings: SETTINGSlocal,
 						globalSettings: SETTINGS,
 						cwd: pkgPath,
+						lockfile: lockfile,
 					});
 				}
-		});
+			}
+			else {
+				resolve({
+					version: pkg.version,
+					modules: allModules,
+					settings: SETTINGSlocal,
+					globalSettings: SETTINGS,
+					cwd: pkgPath,
+					lockfile: lockfile,
+				});
+			}
+	});
 
 	});
 }

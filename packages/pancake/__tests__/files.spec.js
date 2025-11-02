@@ -17,15 +17,15 @@ const Path = require( 'path' );
 /**
  * Test that correct array is returned when function runs
  */
-const modulePath = Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@gov.au`);
+const modulePath = Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@truecms`);
 
 const result = [
-	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@gov.au/pancake`),
-	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@gov.au/pancake-js`),
-	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@gov.au/pancake-sass`),
-	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@gov.au/testmodule1`),
-	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@gov.au/testmodule2`),
-	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@gov.au/testmodule3`),
+	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@truecms/pancake`),
+	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@truecms/pancake-js`),
+	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@truecms/pancake-sass`),
+	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@truecms/testmodule1`),
+	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@truecms/testmodule2`),
+	Path.normalize(`${ __dirname }/../../../tests/test5/node_modules/@truecms/testmodule3`),
 ]
 
 test('ModulePath should return array of all folders in path', () => {

@@ -5,10 +5,12 @@
  * @file - pancake-sass/src/sass.js
  *
  **************************************************************************************************************************************************************/
+const Path = require( 'path' );
+const Fs = require( 'fs' );
+const Os = require( 'os' );
 
 
 const { GetPath, GetDependencies, GenerateSass, Sassify } = require( '../src/sass' );
-const Path = require( 'path' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -16,15 +18,15 @@ const Path = require( 'path' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const modules = [
 	{
-		'name': '@gov.au/testmodule1',
+		'name': '@truecms/testmodule1',
 		'version': '11.0.1',
 		'peerDependencies': {},
 		'pancake': {
 			'pancake-module': {
 				'version': '1.0.0',
 				'plugins': [
-					'@gov.au/pancake-sass',
-					'@gov.au/pancake-js',
+					'@truecms/pancake-sass',
+					'@truecms/pancake-js',
 				],
 				'sass': {
 					'path': 'lib/sass/_module.scss',
@@ -35,20 +37,20 @@ const modules = [
 				},
 			},
 		},
-		'path': `${ __dirname }/../../../tests/test1/node_modules/@gov.au/testmodule1`,
+		'path': `${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule1`,
 	},
 	{
-		'name': '@gov.au/testmodule2',
+		'name': '@truecms/testmodule2',
 		'version': '13.0.0',
 		'peerDependencies': {
-			'@gov.au/testmodule1': '^11.0.1',
+			'@truecms/testmodule1': '^11.0.1',
 		},
 		'pancake': {
 			'pancake-module': {
 				'version': '1.0.0',
 				'plugins': [
-					'@gov.au/pancake-sass',
-					'@gov.au/pancake-js',
+					'@truecms/pancake-sass',
+					'@truecms/pancake-js',
 				],
 				'sass': {
 					'path': 'lib/sass/_module.scss',
@@ -59,14 +61,14 @@ const modules = [
 				},
 			},
 		},
-		'path': `${ __dirname }/../../../tests/test1/node_modules/@gov.au/testmodule2`,
+		'path': `${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2`,
 	},
 ];
 
-const moduleName = '@gov.au/testmodule2';
-const baseLocation = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@gov.au/`);
-const npmOrg = '@gov.au';
-const resultPath = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@gov.au/testmodule2/lib/sass/_module.scss`);
+const moduleName = '@truecms/testmodule2';
+const baseLocation = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/`);
+const npmOrg = '@truecms';
+const resultPath = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2/lib/sass/_module.scss`);
 
 test('GetPath should return path for sass partial', () => {
 	expect( GetPath( moduleName, modules, baseLocation, npmOrg ) ).toBe( resultPath );
@@ -74,7 +76,7 @@ test('GetPath should return path for sass partial', () => {
 
 
 test('GetPath should return path for sass partial with multiple orgs', () => {
-	expect( GetPath( moduleName, modules, baseLocation, '@gov.au @nsw.gov.au' ) ).toBe( resultPath );
+	expect( GetPath( moduleName, modules, baseLocation, '@truecms @nsw.gov.au' ) ).toBe( resultPath );
 });
 
 
@@ -82,7 +84,7 @@ test('GetPath should return path for sass partial with multiple orgs', () => {
 // GetDependencies function
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const ResultDependencies = {
-	'@gov.au/testmodule1': '^11.0.1',
+	'@truecms/testmodule1': '^11.0.1',
 };
 
 test('GetDependencies should return object of all dependencies', () => {
@@ -95,10 +97,10 @@ test('GetDependencies should return object of all dependencies', () => {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const sassPath = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/`);
 
-const ResultGenerateSass = `@import "${ sassPath }@gov.au/testmodule1/lib/sass/_module.scss";\n` +
-	`@import "${ sassPath }@gov.au/testmodule2/lib/sass/_module.scss";\n`;
+const ResultGenerateSass = `@import "${ sassPath }@truecms/testmodule1/lib/sass/_module.scss";\n` +
+	`@import "${ sassPath }@truecms/testmodule2/lib/sass/_module.scss";\n`;
 
-const Location = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@gov.au/testmodule2`);
+const Location = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2`);
 
 test('GenerateSass should return path to sass partial import', () => {
 	expect( GenerateSass( Location, moduleName, modules, npmOrg ) ).toBe( ResultGenerateSass );
@@ -121,18 +123,38 @@ const settings = {
 		'ie 9',
 		'ie 10',
 	],
+	'browserslist': [
+		'last 2 versions',
+		'ie 8',
+		'ie 9',
+		'ie 10',
+	],
 	'location': 'pancake/css/',
 	'name': 'pancake.min.css',
 };
 
 const sass = `/*! PANCAKE v${ pancakeVersion } PANCAKE-SASS v${ pancakeSassVersion } */\n\n` +
 	`@import "${ sassPath }sass-versioning/dist/_index.scss";\n\n` +
-	`@import "${ sassPath }@gov.au/testmodule1/lib/sass/_module.scss";\n` +
-	`@import "${ sassPath }@gov.au/testmodule2/lib/sass/_module.scss";\n\n` +
+	`@import "${ sassPath }@truecms/testmodule1/lib/sass/_module.scss";\n` +
+	`@import "${ sassPath }@truecms/testmodule2/lib/sass/_module.scss";\n\n` +
 	`@include versioning-check();\n`;
 
 test('Sassify should resolve promise', () => {
 	return Sassify( cssLocation, settings, sass ).then( data => {
 		expect( data ).toBe( true );
 	});
+});
+
+test('Sassify should write sourcemap when enabled', async () => {
+	const tempDir = Fs.mkdtempSync( Path.join( Os.tmpdir(), 'pancake-sass-test-' ) );
+	const tempCssLocation = Path.join( tempDir, 'pancake.min.css' );
+	const sourcemapSettings = Object.assign( {}, settings, { sourcemap: true } );
+
+	try {
+		await Sassify( tempCssLocation, sourcemapSettings, sass );
+		expect( Fs.existsSync( `${ tempCssLocation }.map` ) ).toBe( true );
+	}
+	finally {
+		Fs.rmSync( tempDir, { recursive: true, force: true } );
+	}
 });

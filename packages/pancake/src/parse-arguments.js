@@ -21,7 +21,7 @@
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Included modules
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const { Log, Style } = require( './logging' );
+const { Log, Style } = require( './log' );
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -67,7 +67,12 @@ module.exports.ParseArgs = ( SETTINGS, args = process.argv ) => {
 		'--json': {
 			name: 'json',
 			short: '-j',
-			options: 1,
+			options: 0,
+		},
+		'--silent': {
+			name: 'silent',
+			short: '-q',
+			options: 0,
 		},
 		'--noplugins': {
 			name: 'plugins',
@@ -93,7 +98,8 @@ module.exports.ParseArgs = ( SETTINGS, args = process.argv ) => {
 		nosave: false,
 		set: [],
 		org: SETTINGS.npmOrg,
-		json: SETTINGS.json,
+		json: false,
+		silent: false,
 		plugins: true,
 		ignorePlugins: [],
 		help: false,
