@@ -49,17 +49,19 @@ jobs:
       - name: Run lint script (if present)
         id: lint
         run: |
-          pnpm pkg get scripts.lint >/tmp/lint.json 2>/dev/null || echo "{}" > /tmp/lint.json
-          SUMMARY=$(tr -d '[:space:]' </tmp/lint.json)
-          if [ "$SUMMARY" = "{}" ] || [ -z "$SUMMARY" ]; then
-            echo "No lint script defined. Skipping."
-            if [ -n "${GITHUB_OUTPUT:-}" ]; then
-              echo "present=false" >> "$GITHUB_OUTPUT"
-            fi
-          else
+          if node - <<'EOF'
+const pkg = require('./package.json');
+process.exit(pkg.scripts && pkg.scripts.lint ? 0 : 1);
+EOF
+          then
             pnpm run lint
             if [ -n "${GITHUB_OUTPUT:-}" ]; then
               echo "present=true" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "No lint script defined. Skipping."
+            if [ -n "${GITHUB_OUTPUT:-}" ]; then
+              echo "present=false" >> "$GITHUB_OUTPUT"
             fi
           fi
 
