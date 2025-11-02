@@ -6,6 +6,8 @@ on:
     branches:
       - main
       - 001-upgrade-support-latest
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -30,6 +32,31 @@ jobs:
           corepack prepare pnpm@8.15.9 --activate
 
       - name: Run deterministic install gate
+        id: install_check
         env:
           CI: 'true'
-        run: pnpm run install:check
+        run: |
+          set -o pipefail
+          mkdir -p .tmp/install-check
+          node scripts/install-check.mjs 2>&1 | tee .tmp/install-check/install-check.log
+
+      - name: Summarise install check
+        if: always()
+        run: |
+          if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+            echo "### Install Check" >> "$GITHUB_STEP_SUMMARY"
+            if [ "${{ steps.install_check.outcome }}" = 'success' ]; then
+              echo "- ✅ \`pnpm run install:check\` completed" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "- ❌ \`pnpm run install:check\` failed" >> "$GITHUB_STEP_SUMMARY"
+              echo "  - See attached artefacts for logs" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+
+      - name: Upload install-check log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: install-check-log
+          path: .tmp/install-check/install-check.log
+          if-no-files-found: warn

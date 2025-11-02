@@ -12,6 +12,13 @@ This checklist coordinates `@truecms/*` Pancake releases. Follow every step in o
    - `pnpm run release:dry-run -- --allow-dirty --skip-publish` (ensures versioning + scripts are healthy without mutating the branch).
 4. Review `pnpm audit --prod`; address critical issues or capture mitigations in the release notes.
 
+## CI Authentication
+
+1. Generate an npm **Automation Token** from `https://www.npmjs.com/settings/<account>/tokens`. Automation tokens are the only token type that bypass two-factor prompts in CI.
+2. Store the token in the GitHub repository secrets as `NPM_TOKEN` (Settings → Secrets and variables → Actions).
+3. Optionally scope the token to npm organisations if required by corporate policy.
+4. Verify the token before release by running `pnpm whoami` locally with `NODE_AUTH_TOKEN` exported.
+
 ## Record Changes
 
 1. For each logical change, run `pnpm run changeset` and select affected packages.

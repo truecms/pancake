@@ -102,11 +102,11 @@
 
 ### Implementation for User Story 4
 
-- [ ] T023 [US4] Create `.github/workflows/ci.yml` with Node 22 matrix (Linux/macOS/Windows) covering lint, Vitest, fixture diff, and packaging jobs with pnpm caching.
-- [ ] T024 [P] [US4] Add `.github/workflows/install-check.yml` running `pnpm run install:check`, uploading diff artefacts, and posting summary annotations.
-- [ ] T025 [US4] Add `.github/workflows/release.yml` to run Changesets versioning and publish to npm using the `@truecms` token after CI success.
-- [ ] T026 [P] [US4] Archive legacy CircleCI: move `.circleci/config.yml` to `docs/ci-archive/` with deprecation notice and update `README.md` badges to GitHub Actions.
-- [ ] T027 [US4] Add `scripts/ci/format-summary.mjs` to collate fixture diff results and include them in GitHub Actions job summaries for quick triage.
+- [X] T023 [US4] Create `.github/workflows/ci.yml` with Node 22 matrix (Linux/macOS/Windows) covering lint, Vitest, fixture diff, and packaging jobs with pnpm caching.
+- [X] T024 [P] [US4] Add `.github/workflows/install-check.yml` running `pnpm run install:check`, uploading diff artefacts, and posting summary annotations.
+- [X] T025 [US4] Add `.github/workflows/release.yml` to run Changesets versioning and publish to npm using the `@truecms` token after CI success.
+- [X] T026 [P] [US4] Archive legacy CircleCI: move `.circleci/config.yml` to `docs/ci-archive/` with deprecation notice and update `README.md` badges to GitHub Actions.
+- [X] T027 [US4] Add `scripts/ci/format-summary.mjs` to collate fixture diff results and include them in GitHub Actions job summaries for quick triage.
 
 **Checkpoint**: GitHub Actions pipelines enforce merge-blocking status with actionable logs and replace CircleCI entirely.
 
