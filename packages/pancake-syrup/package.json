@@ -53,8 +53,8 @@
 	],
 	"dependencies": {
 		"@truecms/pancake": "~2.0.0",
+		"@cypress/request": "^3.0.9",
 		"inquirer": "6.2.2",
-		"request": "^2.88.0",
 		"strip-ansi": "5.1.0"
 	},
 	"devDependencies": {

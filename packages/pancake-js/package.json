@@ -48,7 +48,7 @@
 	],
 	"dependencies": {
 		"@truecms/pancake": "~2.0.0",
-		"esbuild": "^0.21.5"
+		"esbuild": "^0.25.0"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.2.3",

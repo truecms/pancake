@@ -134,9 +134,9 @@
 
 **Purpose**: Final verification across the monorepo.
 
-- [ ] T033 Run repository-wide quality gates: `pnpm lint`, `pnpm vitest run`, `pnpm run install:check`, and ensure fixture diff reports are clean; address any regressions.
-- [ ] T034 [P] Execute `pnpm audit --prod` and resolve remaining vulnerabilities by bumping dependencies or documenting mitigations.
-- [ ] T035 Prepare release candidate: run `pnpm changeset version`, `pnpm run release:dry-run`, capture artefacts for review, and reset working tree after validation.
+- [x] T033 Run repository-wide quality gates: `pnpm lint`, `pnpm vitest run`, `pnpm run install:check`, and ensure fixture diff reports are clean; address any regressions.
+- [x] T034 [P] Execute `pnpm audit --prod` and resolve remaining vulnerabilities by bumping dependencies or documenting mitigations.
+- [x] T035 Prepare release candidate: run `pnpm changeset version`, `pnpm run release:dry-run`, capture artefacts for review, and reset working tree after validation.
 
 ---
 
