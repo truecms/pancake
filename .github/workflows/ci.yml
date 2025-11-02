@@ -53,10 +53,14 @@ jobs:
           SUMMARY=$(tr -d '[:space:]' </tmp/lint.json)
           if [ "$SUMMARY" = "{}" ] || [ -z "$SUMMARY" ]; then
             echo "No lint script defined. Skipping."
-            echo "present=false" >> "$GITHUB_OUTPUT"
+            if [ -n "${GITHUB_OUTPUT:-}" ]; then
+              echo "present=false" >> "$GITHUB_OUTPUT"
+            fi
           else
             pnpm run lint
-            echo "present=true" >> "$GITHUB_OUTPUT"
+            if [ -n "${GITHUB_OUTPUT:-}" ]; then
+              echo "present=true" >> "$GITHUB_OUTPUT"
+            fi
           fi
 
       - name: Summarise lint status
