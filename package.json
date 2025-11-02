@@ -3,6 +3,7 @@
 	"private": true,
 	"packageManager": "pnpm@8.15.9",
 	"scripts": {
+		"lint": "pnpm exec changeset status",
 		"test:watch": "pnpm exec vitest watch",
 		"test:unit-test": "pnpm exec vitest run",
 		"test:end-to-end": "node tests/tester.js",
