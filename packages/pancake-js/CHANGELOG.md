@@ -1,5 +1,12 @@
 Pancake JS plugin
 
+## 2.0.2
+
+### Patch Changes
+
+- 8b9b68f: - Upgrade @truecms/pancake-js dependency on `esbuild` to `^0.25.x` to address dev-server advisory (GHSA-67mh-4wv8-2f99) without changing emitted bundles.
+  - Ensure `@truecms/syrup` patch version to capture dependency hygiene improvements alongside the security roll-up.
+
 ## 2.0.1
 
 ### Patch Changes

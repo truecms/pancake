@@ -1,6 +1,6 @@
 {
 	"name": "@truecms/syrup",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "Syrup helps you select the right pancake modules.",
 	"packageManager": "pnpm@8.15.9",
 	"keywords": [

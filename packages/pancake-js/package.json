@@ -1,6 +1,6 @@
 {
 	"name": "@truecms/pancake-js",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "A Pancake plugin to minify js files.",
 	"packageManager": "pnpm@8.15.9",
 	"keywords": [
