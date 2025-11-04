@@ -1,5 +1,12 @@
 Pancake JS plugin
 
+## 2.0.1
+
+### Patch Changes
+
+- [#1](https://github.com/truecms/pancake/pull/1) [`3aa8027`](https://github.com/truecms/pancake/commit/3aa802715da195eac14486d04c7969c04aed97cb) Thanks [@ivangrynenko](https://github.com/ivangrynenko)! - - Upgrade the JS bundler to esbuild 0.25.x so recent npm advisories are addressed without changing emitted bundles.
+  - Replace the legacy request client in syrup with @cypress/request to pull in patched form-data and tough-cookie dependencies.
+
 ## 2.0.0
 
 ### Major Changes
