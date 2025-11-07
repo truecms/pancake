@@ -64,17 +64,14 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/govau/pancake.git"
+		"url": "https://github.com/truecms/pancake.git"
 	},
-	"homepage": "https://github.com/govau/pancake",
+	"homepage": "https://github.com/truecms/pancake",
 	"bugs": {
-		"url": "https://github.com/govau/pancake/issues",
-		"email": "designsystem@digital.gov.au"
+		"url": "https://github.com/truecms/pancake/issues"
 	},
 	"author": {
-		"name": "Commonwealth of Australia, DTA",
-		"email": "designsystem@digital.gov.au",
-		"url": "https://www.dta.gov.au/"
+		"name": "trueCMS maintainers"
 	},
 	"contributors": [
 		{

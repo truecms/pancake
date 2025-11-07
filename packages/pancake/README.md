@@ -38,7 +38,7 @@ npm install @truecms/pancake --save-dev
 
 ## Build
 
-To run the pancake build make sure you go to the monorepo this package came from and clone the source from there: https://github.com/govau/pancake
+To run the pancake build make sure you go to the monorepo this package came from and clone the source from there: https://github.com/truecms/pancake
 
 
 **[⬆ back to top](#contents)**
@@ -49,7 +49,7 @@ To run the pancake build make sure you go to the monorepo this package came from
 
 ## Tests
 
-To run the tests make sure you go to the monorepo this package came from and clone the source from there: https://github.com/govau/pancake
+To run the tests make sure you go to the monorepo this package came from and clone the source from there: https://github.com/truecms/pancake
 
 
 **[⬆ back to top](#contents)**
@@ -91,7 +91,7 @@ To run the tests make sure you go to the monorepo this package came from and clo
 
 ## License
 
-Copyright (c) Commonwealth of Australia.
+MIT — see `LICENSE`.
 Licensed under [MIT](https://raw.githubusercontent.com/govau/pancake/master/LICENSE).
 
 
