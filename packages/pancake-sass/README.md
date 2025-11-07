@@ -94,7 +94,6 @@ To run the tests make sure you go to the monorepo this package came from and clo
 ## License
 
 MIT — see `LICENSE`.
-Licensed under [MIT](https://raw.githubusercontent.com/govau/pancake/master/LICENSE).
 
 
 **[⬆ back to top](#contents)**

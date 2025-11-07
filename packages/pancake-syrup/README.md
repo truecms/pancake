@@ -3,7 +3,7 @@ Syrup
 
 > Syrup is a tool to make working with [pancake](https://github.com/truecms/pancake) and npm easy and sweet.
 
-![Syrup for Pancake](https://raw.githubusercontent.com/govau/pancake/master/packages/pancake-syrup/assets/syrup.gif)
+![Syrup for Pancake](https://raw.githubusercontent.com/truecms/pancake/master/packages/pancake-syrup/assets/syrup.gif)
 
 ## Contents
 
@@ -95,7 +95,6 @@ To run the tests make sure you go to the monorepo this package came from and clo
 ## License
 
 MIT — see `LICENSE`.
-Licensed under [MIT](https://raw.githubusercontent.com/govau/pancake/master/LICENSE).
 
 
 **[⬆ back to top](#contents)**
