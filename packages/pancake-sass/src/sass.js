@@ -1,3 +1,4 @@
+/* (file content inlined) */
 /***************************************************************************************************************************************************************
  *
  * Generate and compile Sass
@@ -181,13 +182,13 @@ module.exports.GenerateSass = ( location, name, modules, npmOrg ) => {
 			const modulePath = GetPath( dependency, modules, baseLocation, npmOrg );
 
 			if( modulePath ) {
-				sass += `@import "${ modulePath }";\n`;
+				sass += `@use "${ modulePath }" as *;\n`;
 			}
 		}
 	}
 
 	const modulePath = GetPath( name, modules, baseLocation, npmOrg );
-	sass += `@import "${ modulePath }";\n`;
+	sass += `@use "${ modulePath }" as *;\n`;
 
 	return sass.replace(/\\/g, "\\\\"); // escape path for silly windows
 };
@@ -208,7 +209,14 @@ module.exports.Sassify = async ( location, settings, sass ) => {
 		const compileOptions = {
 			style: settings.minified ? 'compressed' : 'expanded',
 			importers: [ createFileImporter() ],
+			quietDeps: true,
 		};
+
+		// Optionally silence specific deprecations if the env toggle is set
+		const silenceToggle = process.env.PANCAKE_SASS_SILENCE_DEPRECATIONS;
+		if( silenceToggle && silenceToggle !== '0' && silenceToggle.toLowerCase() !== 'false' ) {
+			compileOptions.silenceDeprecations = [ 'import', 'global-builtin' ];
+		}
 
 		if( shouldWriteSourceMap ) {
 			compileOptions.sourceMap = true;
