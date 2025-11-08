@@ -13,7 +13,7 @@ Pancake SVG plugin
 - Updated dependencies:
   - @truecms/pancake@2.0.0
 
-> This is a [Pancake](https://github.com/govau/pancake) plugin to handle svg files.
+> This is a [Pancake](https://github.com/truecms/pancake) plugin to handle svg files.
 
 ## Versions
 

@@ -1,9 +1,9 @@
 Syrup
 =====
 
-> Syrup is a tool to make working with [pancake](https://github.com/govau/pancake) and npm easy and sweet.
+> Syrup is a tool to make working with [pancake](https://github.com/truecms/pancake) and npm easy and sweet.
 
-![Syrup for Pancake](https://raw.githubusercontent.com/govau/pancake/master/packages/pancake-syrup/assets/syrup.gif)
+![Syrup for Pancake](https://raw.githubusercontent.com/truecms/pancake/master/packages/pancake-syrup/assets/syrup.gif)
 
 ## Contents
 
@@ -39,7 +39,7 @@ npm install @truecms/syrup --save-dev
 ## What is this
 
 
-Syrup let’s you install [Design System Components](https://github.com/govau/design-system-components) easily. It makes it easy to understand how to upgrade to newer versions and
+Syrup lets you install [Design System Components](https://github.com/truecms/design-system-components) easily. It makes it easy to understand how to upgrade to newer versions and
 gives you suggestions as to what you can do when hitting a versions conflict.
 
 
@@ -51,7 +51,7 @@ gives you suggestions as to what you can do when hitting a versions conflict.
 
 ## Build
 
-To run the pancake build make sure you go to the monorepo this package came from and clone the source from there: https://github.com/govau/pancake
+To run the pancake build make sure you go to the monorepo this package came from and clone the source from there: https://github.com/truecms/pancake
 
 
 **[⬆ back to top](#contents)**
@@ -62,7 +62,7 @@ To run the pancake build make sure you go to the monorepo this package came from
 
 ## Tests
 
-To run the tests make sure you go to the monorepo this package came from and clone the source from there: https://github.com/govau/pancake
+To run the tests make sure you go to the monorepo this package came from and clone the source from there: https://github.com/truecms/pancake
 
 
 **[⬆ back to top](#contents)**
@@ -94,8 +94,7 @@ To run the tests make sure you go to the monorepo this package came from and clo
 
 ## License
 
-Copyright (c) Commonwealth of Australia.
-Licensed under [MIT](https://raw.githubusercontent.com/govau/pancake/master/LICENSE).
+MIT — see `LICENSE`.
 
 
 **[⬆ back to top](#contents)**
