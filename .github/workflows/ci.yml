@@ -117,6 +117,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build workspaces
+        run: pnpm run build
+
       - name: Run unit tests
         run: pnpm run test:unit-test
 
@@ -145,6 +148,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build workspaces
+        run: pnpm run build
 
       - name: Run fixture regression suite
         id: fixtures
