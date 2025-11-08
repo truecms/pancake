@@ -134,12 +134,12 @@ const assertDirectoryExists = async ( directory: string ) => {
 
 describe( 'plugin output regression', () => {
 	for( const scenario of scenarios ) {
-                test( `matches baseline for ${ scenario.name }`, async () => {
-                        const tempScenario = await prepareScenario( scenario.sourceDir );
-                        const tempBaseline = await prepareBaseline( scenario.baselineDir );
+		test( `matches baseline for ${ scenario.name }`, async () => {
+			const tempScenario = await prepareScenario( scenario.sourceDir );
+			const tempBaseline = await prepareBaseline( scenario.baselineDir );
 
-                        try {
-                                await runPancake( tempScenario, scenario.options );
+			try {
+				await runPancake( tempScenario, scenario.options );
 
 				const actualDir = join( tempScenario, scenario.outputDir );
 				await assertDirectoryExists( actualDir );
@@ -161,11 +161,11 @@ describe( 'plugin output regression', () => {
 				}
 			}
 			finally {
-                                await rm( tempScenario, { recursive: true, force: true } );
-                                await rm( tempBaseline, { recursive: true, force: true } );
-                        }
-                }, { timeout: 120_000 } );
-        }
+				await rm( tempScenario, { recursive: true, force: true } );
+				await rm( tempBaseline, { recursive: true, force: true } );
+			}
+		}, { timeout: 120_000 } );
+	}
 } );
 
 const escapeForRegExp = ( value: string ) => value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
