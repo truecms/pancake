@@ -134,7 +134,7 @@ const assertDirectoryExists = async ( directory: string ) => {
 
 describe( 'plugin output regression', () => {
 	for( const scenario of scenarios ) {
-		test( `matches baseline for ${ scenario.name }`, async () => {
+		test( `matches baseline for ${ scenario.name }`, { timeout: 120_000 }, async () => {
 			const tempScenario = await prepareScenario( scenario.sourceDir );
 			const tempBaseline = await prepareBaseline( scenario.baselineDir );
 
@@ -164,7 +164,7 @@ describe( 'plugin output regression', () => {
 				await rm( tempScenario, { recursive: true, force: true } );
 				await rm( tempBaseline, { recursive: true, force: true } );
 			}
-		}, { timeout: 120_000 } );
+		} );
 	}
 } );
 
