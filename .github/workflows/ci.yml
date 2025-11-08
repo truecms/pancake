@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
       - 001-upgrade-support-latest
     tags:
       - 'v*'

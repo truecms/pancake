@@ -12,6 +12,8 @@ const Os = require( 'os' );
 
 const { GetPath, GetDependencies, GenerateSass, Sassify } = require( '../src/sass' );
 
+// Silence Sass deprecation warnings during unit tests to keep logs clean
+process.env.PANCAKE_SASS_SILENCE_DEPRECATIONS = '1';
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // GetPath function
