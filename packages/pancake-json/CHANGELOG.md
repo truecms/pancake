@@ -13,7 +13,7 @@ Pancake JS plugin
 - Updated dependencies:
   - @truecms/pancake@2.0.0
 
-> This is a [Pancake](https://github.com/govau/pancake) plugin to generate a json file from all pancake modules..
+> This is a [Pancake](https://github.com/truecms/pancake) plugin to generate a json file from all pancake modules..
 
 ## Versions
 
@@ -61,9 +61,9 @@ Pancake JS plugin
 ## v1.0.3
 
 - When `auto-save` is enabled, pancake-json would only save `"json": {}` into the `package.json` file. No more!
-  [(57)](https://github.com/govau/pancake/issues/57)
+  [(57)](https://github.com/truecms/pancake/issues/57)
 - When enabling `pancake-json` and `auto-save` the plugin would merge the json from the plugin into the package.json file. Like talk about over-sharing!
-  [(58)](https://github.com/govau/pancake/issues/58)
+  [(58)](https://github.com/truecms/pancake/issues/58)
 
 ## v1.0.2
 

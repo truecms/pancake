@@ -4,9 +4,9 @@
  *
  * Move and uglify js files from pancake modules into your pancake folder
  *
- * @repo    - https://github.com/govau/pancake
+ * @repo    - https://github.com/truecms/pancake
  * @author  - Dominik Wilkowski
- * @license - https://raw.githubusercontent.com/govau/pancake/master/LICENSE (MIT)
+ * @license - https://raw.githubusercontent.com/truecms/pancake/master/LICENSE (MIT)
  *
  **************************************************************************************************************************************************************/
 
