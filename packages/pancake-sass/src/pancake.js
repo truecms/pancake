@@ -1,3 +1,4 @@
+/* (file content inlined) */
 /***************************************************************************************************************************************************************
  *
  * Plug-in for Pancake
@@ -199,7 +200,7 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 
 					sass = `${ banner }` +
 						`/* ${ modulePackage.name } v${ modulePackage.version } */\n\n` +
-						`@import "${ sassVersioningPath }";\n\n` +
+						`@use "${ sassVersioningPath }" as *;\n\n` +
 						`${ sass }\n`
 				}
 				else {
@@ -208,7 +209,7 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 
 				//write css file
 				if( SETTINGS.css.modules ) {
-					const location = Path.normalize(`${ cwd }/${ SETTINGS.css.location }/${ modulePackage.name.split('/')[ 1 ] }.css`);
+					const location = Path.normalize(`${ cwd }/${ SETTINGS.css.location }/${ modulePackage.name.split('/') [ 1 ] }.css`);
 
 					compiledAll.push(
 						Sassify( location, SETTINGS.css, sass ) //generate css and write file
@@ -220,7 +221,7 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 
 				//write sass file
 				if( SETTINGS.sass.modules ) {
-					const location = Path.normalize(`${ cwd }/${ SETTINGS.sass.location }/${ modulePackage.name.split('/')[ 1 ] }.scss`);
+					const location = Path.normalize(`${ cwd }/${ SETTINGS.sass.location }/${ modulePackage.name.split('/') [ 1 ] }.scss`);
 
 					compiledAll.push(
 						WriteFile( location, sass ) //write file
@@ -248,7 +249,7 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 
 			if( sassVersioning === true ) {
 				allSass = `${ banner }` +
-					`@import "${ sassVersioningPath }";\n\n` +
+					`@use "${ sassVersioningPath }" as *;\n\n` +
 					`${ StripDuplicateLines( allSass ) }\n\n`
 			}
 			else {

@@ -1,3 +1,4 @@
+/* (file content inlined) */
 import { describe, test, expect } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, relative } from 'node:path';

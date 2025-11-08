@@ -1,3 +1,4 @@
+/* (file content inlined) */
 /***************************************************************************************************************************************************************
  *
  * sass.js unit tests
@@ -12,6 +13,8 @@ const Os = require( 'os' );
 
 const { GetPath, GetDependencies, GenerateSass, Sassify } = require( '../src/sass' );
 
+// Silence Sass deprecation warnings during unit tests to keep logs clean
+process.env.PANCAKE_SASS_SILENCE_DEPRECATIONS = '1';
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // GetPath function
@@ -44,25 +47,25 @@ const modules = [
 		'version': '13.0.0',
 		'peerDependencies': {
 			'@truecms/testmodule1': '^11.0.1',
-		},
-		'pancake': {
-			'pancake-module': {
-				'version': '1.0.0',
-				'plugins': [
-					'@truecms/pancake-sass',
-					'@truecms/pancake-js',
-				],
-				'sass': {
-					'path': 'lib/sass/_module.scss',
-					'sass-versioning': true,
-				},
-				'js': {
-					'path': 'lib/js/module.js',
+			},
+			'pancake': {
+				'pancake-module': {
+					'version': '1.0.0',
+					'plugins': [
+						'@truecms/pancake-sass',
+						'@truecms/pancake-js',
+					],
+					'sass': {
+						'path': 'lib/sass/_module.scss',
+						'sass-versioning': true,
+					},
+					'js': {
+						'path': 'lib/js/module.js',
+					},
 				},
 			},
+			'path': `${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2`,
 		},
-		'path': `${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2`,
-	},
 ];
 
 const moduleName = '@truecms/testmodule2';
@@ -97,8 +100,8 @@ test('GetDependencies should return object of all dependencies', () => {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const sassPath = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/`);
 
-const ResultGenerateSass = `@import "${ sassPath }@truecms/testmodule1/lib/sass/_module.scss";\n` +
-	`@import "${ sassPath }@truecms/testmodule2/lib/sass/_module.scss";\n`;
+const ResultGenerateSass = `@use "${ sassPath }@truecms/testmodule1/lib/sass/_module.scss" as *;\n` +
+	`@use "${ sassPath }@truecms/testmodule2/lib/sass/_module.scss" as *;\n`;
 
 const Location = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2`);
 
