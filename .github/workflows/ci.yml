@@ -31,6 +31,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Fetch master branch for Changesets
+        if: github.event_name == 'pull_request'
+        run: git fetch --no-tags origin master --depth=1
+
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
