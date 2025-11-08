@@ -36,3 +36,5 @@ Thumbs.db
 *.swp
 .vscode/
 .local/
+# Ignore local specs directory; keep untracked
+/specs/
