@@ -1,0 +1,80 @@
+name: Prerelease (develop)
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: prerelease-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  publish_snapshot:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'develop' }}
+    name: Publish snapshot to npm (dist-tag: next)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository at commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.21.1'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Enable Corepack and pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@8.15.9 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspaces
+        run: pnpm run build
+
+      - name: Check for pending changesets
+        id: changesets
+        run: |
+          if [ -d ".changeset" ] && ls -1 .changeset | grep -v "^config\.json$" >/dev/null 2>&1; then
+            echo "has_changesets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changesets=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create snapshot versions (dist: next)
+        if: steps.changesets.outputs.has_changesets == 'true'
+        run: pnpm exec changeset version --snapshot next
+
+      - name: Publish snapshot to npm with dist-tag 'next'
+        if: steps.changesets.outputs.has_changesets == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm exec changeset publish --no-git-tag --tag next
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+            echo "### Prerelease (develop)" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Branch: ${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Has changesets: ${{ steps.changesets.outputs.has_changesets }}" >> "$GITHUB_STEP_SUMMARY"
+            if [ "${{ steps.changesets.outputs.has_changesets }}" != "true" ]; then
+              echo "- Skipped publish (no pending changesets)" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "- Published snapshot with dist-tag 'next'" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+
+
