@@ -48,10 +48,7 @@ jobs:
       - name: Run lint script (if present)
         id: lint
         run: |
-          if node - <<'EOF'
-const pkg = require('./package.json');
-process.exit(pkg.scripts && pkg.scripts.lint ? 0 : 1);
-EOF
+          if node -e 'const pkg = require("./package.json"); if (!(pkg.scripts && pkg.scripts.lint)) { process.exit(1); }'
           then
             pnpm run lint
             if [ -n "${GITHUB_OUTPUT:-}" ]; then
