@@ -160,7 +160,7 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 		let compiledAll = [];      //for collect all promises
 		let allSass = '';          //all modules to be collected for SETTINGS.css.name file
-		let sassVersioning = true; //let’s assume the pancake module was build with sass-versioning
+		let sassVersioning = false; //assume sass-versioning is disabled unless a module opts in
 		const sassVersioningPath = ( Fs.existsSync( Path.normalize( `${ cwd }/../node_modules/sass-versioning` ) ) )
 			? Path.normalize( `${ cwd }/../node_modules/sass-versioning/dist/_index.scss` ).replace(/\\/g, "\\\\")
 			: Path.normalize( `${ cwd }/node_modules/sass-versioning/dist/_index.scss` ).replace(/\\/g, "\\\\");
@@ -212,7 +212,7 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 					const location = Path.normalize(`${ cwd }/${ SETTINGS.css.location }/${ modulePackage.name.split('/') [ 1 ] }.css`);
 
 					compiledAll.push(
-						Sassify( location, SETTINGS.css, sass ) //generate css and write file
+						Sassify( location, SETTINGS.css, sass, cwd ) //generate css and write file
 							.catch( error => {
 								Log.error( error );
 						})
@@ -259,7 +259,7 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 			//generate SETTINGS.css.name file
 			if( SETTINGS.css.name !== false ) {
 				compiledAll.push(
-					Sassify( locationCSS, SETTINGS.css, allSass )
+					Sassify( locationCSS, SETTINGS.css, allSass, cwd )
 						.catch( error => {
 							Log.error( error );
 					})

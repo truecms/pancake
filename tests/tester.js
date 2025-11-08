@@ -223,7 +223,10 @@ const TESTER = (() => { //constructor factory
 								TESTER.delete( scriptFolder, unit );
 							}
 						})
-						.catch( error => TESTER.log.error(`Nooo: ${ error }`) )         //catch errors...
+						.catch( error => {
+							TESTER.PASS = false;
+							TESTER.log.error(`Nooo: ${ unit.name }: ${ error }`);
+						})         //catch errors...
 				);
 			}
 

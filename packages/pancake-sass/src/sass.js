@@ -31,12 +31,14 @@ const { Log, Style, WriteFile } = require( '@truecms/pancake' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Sass helpers
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const createFileImporter = () => ({
-	canonicalize( url ) {
+const createFileImporter = ( cwd, loadPaths = [] ) => ({
+	canonicalize( url, options ) {
 		if( typeof url !== 'string' ) {
 			return null;
 		}
 
+		// Only handle file: URLs and absolute paths
+		// Let Sass use loadPaths for everything else (including node_modules packages)
 		if( url.startsWith( 'file:' ) ) {
 			return new URL( url );
 		}
@@ -45,6 +47,29 @@ const createFileImporter = () => ({
 			return pathToFileURL( url );
 		}
 
+		// Handle package imports like 'sass-versioning/dist/_index.scss'
+		// Check if it looks like a package import (starts with a package name, no leading ./ or ../)
+		// This handles imports from within module files that reference node_modules packages
+		if( !url.startsWith( '.' ) && !url.startsWith( '/' ) && url.indexOf( '/' ) !== -1 ) {
+			const parts = url.split( '/' );
+			const packageName = parts[ 0 ];
+			
+			// Try to resolve from loadPaths (these are node_modules directories)
+			for( const loadPath of loadPaths ) {
+				const packagePath = Path.join( loadPath, packageName );
+				if( Fs.existsSync( packagePath ) ) {
+					const fullPath = Path.join( loadPath, url );
+					if( Fs.existsSync( fullPath ) ) {
+						const resolved = pathToFileURL( fullPath );
+						Log.verbose(`Sass: Resolved package import ${ Style.yellow( url ) } to ${ Style.yellow( fullPath ) }`);
+						return resolved;
+					}
+				}
+			}
+		}
+
+		// Return null for all other imports to let Sass use loadPaths
+		// Sass will try loadPaths automatically for package-like imports
 		return null;
 	},
 	load( canonicalUrl ) {
@@ -92,18 +117,26 @@ const resolveBrowserslist = settings => {
 const GetPath = ( module, modules, baseLocation, npmOrg ) => {
 	let modulePath = '';
 
-	const npmOrgs = npmOrg.split( ' ' );
-	let location;
-	npmOrgs.forEach( org => {
-		if( baseLocation.includes( org ) ){
-			location = baseLocation.replace( `${ org }${ Path.sep }`, '' );
-		}
-	});
-
 	for( const item of modules ) {
 		if( item.name === module ) {
 			if( item.pancake['pancake-module'].sass.path ) {
-				modulePath = Path.normalize(`${ location }/${ module }/${ item.pancake['pancake-module'].sass.path }`);
+				const sassPath = item.pancake['pancake-module'].sass.path.replace(/\\/g, '/' );
+
+				if( module.startsWith( '@' ) ) {
+					modulePath = Path.posix.join( module, sassPath );
+				}
+				else {
+					const npmOrgs = npmOrg.split( ' ' );
+					let locationBase = baseLocation;
+
+					npmOrgs.forEach( org => {
+						if( baseLocation.includes( org ) ){
+							locationBase = baseLocation.replace( `${ org }${ Path.sep }`, '' );
+						}
+					});
+
+					modulePath = Path.normalize(`${ locationBase }/${ module }/${ item.pancake['pancake-module'].sass.path }`);
+				}
 			}
 			else {
 				modulePath = false;
@@ -160,7 +193,7 @@ const GetDependencies = ( module, modules, parent = module, iteration = 1 ) => {
 
 
 /**
- * Generate Sass code for a module and it’s dependencies
+ * Generate Sass code for a module and it's dependencies
  *
  * @param  {string} location - The location of the module to be compiled
  * @param  {object} name     - The name of the module
@@ -200,23 +233,44 @@ module.exports.GenerateSass = ( location, name, modules, npmOrg ) => {
  * @param  {string} location - The path we want to save the compiled css to
  * @param  {object} settings - The SettingsCSS object
  * @param  {string} sass     - The Sass to be compiled
+ * @param  {string} cwd     - The current working directory for resolving node_modules
  *
  * @return {promise object}  - Boolean true for 👍 || string error for 👎
  */
-module.exports.Sassify = async ( location, settings, sass ) => {
+module.exports.Sassify = async ( location, settings, sass, cwd ) => {
 	try {
 		const shouldWriteSourceMap = Boolean( settings.sourcemap );
+		
+		// Build loadPaths for node_modules resolution
+		// Walk up the directory tree to find all node_modules directories
+		const loadPaths = [];
+		if( cwd ) {
+			let currentDir = Path.resolve( cwd );
+			const visited = new Set();
+			
+			// Walk up to find all node_modules directories (for nested dependencies)
+			for( let i = 0; i < 10; i++ ) {
+				const nodeModulesDir = Path.join( currentDir, 'node_modules' );
+				if( Fs.existsSync( nodeModulesDir ) && !visited.has( nodeModulesDir ) ) {
+					loadPaths.push( nodeModulesDir );
+					visited.add( nodeModulesDir );
+				}
+				
+				const parentDir = Path.dirname( currentDir );
+				if( parentDir === currentDir ) {
+					break; // Reached root
+				}
+				currentDir = parentDir;
+			}
+		}
+		
 		const compileOptions = {
 			style: settings.minified ? 'compressed' : 'expanded',
-			importers: [ createFileImporter() ],
+			importers: [ createFileImporter( cwd, loadPaths ) ],
+			loadPaths: loadPaths,
 			quietDeps: true,
+			silenceDeprecations: [ 'import', 'global-builtin' ], // Silence deprecation warnings
 		};
-
-		// Optionally silence specific deprecations if the env toggle is set
-		const silenceToggle = process.env.PANCAKE_SASS_SILENCE_DEPRECATIONS;
-		if( silenceToggle && silenceToggle !== '0' && silenceToggle.toLowerCase() !== 'false' ) {
-			compileOptions.silenceDeprecations = [ 'import', 'global-builtin' ];
-		}
 
 		if( shouldWriteSourceMap ) {
 			compileOptions.sourceMap = true;

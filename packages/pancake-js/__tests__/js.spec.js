@@ -15,7 +15,7 @@ const { Log } = require( '@truecms/pancake' );
 
 
 const fixtureModulePath = Path.normalize(`${ __dirname }/../../../tests/test2/node_modules/@truecms/testmodule1/lib/js/module.js`);
-const fixtureTag = '@truecms/testmodule1 v11.0.1';
+const fixtureTag = '@truecms/testmodule1 v15.0.0';
 const pancakeVersion = require( Path.normalize(`${ __dirname }/../../pancake/package.json`) ).version;
 const pancakeJsVersion = require( Path.normalize(`${ __dirname }/../package.json`) ).version;
 
