@@ -1,5 +1,11 @@
 Pancake
 
+## 2.0.1
+
+### Patch Changes
+
+- Patch release for the Pancake CLI to capture recent dependency and security maintenance updates and ensure compatibility with the Node 22 baseline used in CI.
+
 ## 2.0.0
 
 ### Major Changes
