@@ -71,7 +71,9 @@ const modules = [
 const moduleName = '@truecms/testmodule2';
 const baseLocation = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/`);
 const npmOrg = '@truecms';
-const resultPath = '@truecms/testmodule2/lib/sass/_module.scss';
+const absoluteModule1Path = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule1/lib/sass/_module.scss`);
+const absoluteModule2Path = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2/lib/sass/_module.scss`);
+const resultPath = absoluteModule2Path;
 
 test('GetPath should return path for sass partial', () => {
 	expect( GetPath( moduleName, modules, baseLocation, npmOrg ) ).toBe( resultPath );
@@ -98,8 +100,9 @@ test('GetDependencies should return object of all dependencies', () => {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // GenerateSass function
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const ResultGenerateSass = `@use "@truecms/testmodule1/lib/sass/_module.scss" as *;\n` +
-	`@use "@truecms/testmodule2/lib/sass/_module.scss" as *;\n`;
+const escapePath = path => path.replace(/\\/g, '\\\\');
+const ResultGenerateSass = `@use "${ escapePath( absoluteModule1Path ) }" as *;\n` +
+	`@use "${ escapePath( absoluteModule2Path ) }" as *;\n`;
 
 const Location = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2`);
 
@@ -135,8 +138,8 @@ const settings = {
 };
 
 const sass = `/*! PANCAKE v${ pancakeVersion } PANCAKE-SASS v${ pancakeSassVersion } */\n\n` +
-	`@use "@truecms/testmodule1/lib/sass/_module.scss" as *;\n` +
-	`@use "@truecms/testmodule2/lib/sass/_module.scss" as *;\n`;
+	`@use "${ escapePath( absoluteModule1Path ) }" as *;\n` +
+	`@use "${ escapePath( absoluteModule2Path ) }" as *;\n`;
 
 const testCwd = Path.normalize(`${ __dirname }/../../../tests/test1`);
 

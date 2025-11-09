@@ -27,25 +27,33 @@ const { pathToFileURL, fileURLToPath } = require( 'url' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const { Log, Style, WriteFile } = require( '@truecms/pancake' );
 
-const escapeForRegExp = value => value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+const addBannerForModuleCss = ( css, bannerComment ) => {
+	if( typeof css !== 'string' ) {
+		return css;
+	}
 
-const dedupeBannerComment = ( css, bannerComment ) => {
-        if( typeof bannerComment !== 'string' || bannerComment.trim().length === 0 ) {
-                return css;
-        }
+	if( typeof bannerComment !== 'string' ) {
+		return css;
+	}
 
-        const trimmed = bannerComment.trim();
-        if( trimmed.length === 0 ) {
-                return css;
-        }
+	const trimmed = bannerComment.trim();
 
-        const pattern = new RegExp( escapeForRegExp( trimmed ), 'g' );
-        let matchIndex = 0;
-        return css.replace( pattern, match => {
-                const replacement = ( matchIndex === 0 ) ? match : '';
-                matchIndex += 1;
-                return replacement;
-        } );
+	if( trimmed.length === 0 ) {
+		return css;
+	}
+
+	if( css.includes(`${ trimmed }/*! @`) ) {
+		return css;
+	}
+
+	const MODULE_COMMENT_PATTERN = /\/\*! @/g;
+	const replaced = css.replace( MODULE_COMMENT_PATTERN, `${ trimmed }/*! @` );
+
+	if( replaced === css ) {
+		return `${ trimmed }${ css }`;
+	}
+
+	return replaced;
 };
 
 
@@ -122,30 +130,6 @@ const resolveBrowserslist = settings => {
 };
 
 
-const dedupeBannerPlugin = () => {
-	return {
-		postcssPlugin: 'pancake-dedupe-banner',
-		Once( root ) {
-			let seenBanner = false;
-			root.walkComments( comment => {
-				const text = comment.text || '';
-				if( !text.startsWith('! PANCAKE v') ) {
-					return;
-				}
-
-				if( seenBanner ) {
-					comment.remove();
-				}
-				else {
-					seenBanner = true;
-				}
-			} );
-		},
-	};
-};
-dedupeBannerPlugin.postcss = true;
-
-
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Default export
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -167,21 +151,13 @@ const GetPath = ( module, modules, baseLocation, npmOrg ) => {
 			if( item.pancake['pancake-module'].sass.path ) {
 				const sassPath = item.pancake['pancake-module'].sass.path.replace(/\\/g, '/' );
 
+				let locationBase = baseLocation;
+
 				if( module.startsWith( '@' ) ) {
-					modulePath = Path.posix.join( module, sassPath );
+					locationBase = Path.resolve( locationBase, '..' );
 				}
-				else {
-					const npmOrgs = npmOrg.split( ' ' );
-					let locationBase = baseLocation;
 
-					npmOrgs.forEach( org => {
-						if( baseLocation.includes( org ) ){
-							locationBase = baseLocation.replace( `${ org }${ Path.sep }`, '' );
-						}
-					});
-
-					modulePath = Path.normalize(`${ locationBase }/${ module }/${ item.pancake['pancake-module'].sass.path }`);
-				}
+				modulePath = Path.normalize(`${ locationBase }/${ module }/${ sassPath }`);
 			}
 			else {
 				modulePath = false;
@@ -353,7 +329,6 @@ module.exports.Sassify = async ( location, settings, sass, cwd ) => {
 			: Autoprefixer();
 		const prefixed = await Postcss([
 			autoprefixerPlugin,
-			dedupeBannerPlugin(),
 		]).process( generated.css, postcssOptions );
 
 		prefixed
@@ -362,9 +337,13 @@ module.exports.Sassify = async ( location, settings, sass, cwd ) => {
 
 		Log.verbose(`Sass: Successfully autoprefixed CSS for ${ Style.yellow( location ) }`);
 
-                const outputCss = dedupeBannerComment( prefixed.css, settings && settings.bannerComment );
+		let cssOutput = prefixed.css;
 
-                await WriteFile( location, outputCss );
+		if( settings && settings.__moduleCss && settings.__injectBanner ) {
+			cssOutput = addBannerForModuleCss( cssOutput, settings.bannerComment );
+		}
+
+		await WriteFile( location, cssOutput );
 
 		if( shouldWriteSourceMap && prefixed.map ) {
 			const mapLocation = `${ location }.map`;
