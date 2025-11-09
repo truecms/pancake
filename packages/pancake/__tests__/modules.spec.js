@@ -20,6 +20,11 @@ const Path = require( 'path' );
 const modulePath = Path.normalize(`${ __dirname }/../../../tests/test1`);
 const multipleOrgsPath = Path.normalize(`${ __dirname }/../../../tests/test14`);
 
+const moduleFolder = scope => Path.join( modulePath, 'node_modules', scope );
+const multipleOrgFolder = scope => Path.join( multipleOrgsPath, 'node_modules', scope );
+const modulePackage = ( scope, pkg ) => Path.join( moduleFolder( scope ), pkg );
+const multiOrgPackage = ( scope, pkg ) => Path.join( multipleOrgFolder( scope ), pkg );
+
 const moduleResultObject = [
 	{
 		'name': '@truecms/testmodule1',
@@ -36,7 +41,7 @@ const moduleResultObject = [
 				'version': '1.0.0',
 			},
 		},
-		'path': `${ modulePath }/node_modules/@truecms/testmodule1`,
+		'path': modulePackage( '@truecms', 'testmodule1' ),
 		'peerDependencies': {},
 		'version': '15.0.0',
 	},
@@ -55,7 +60,7 @@ const moduleResultObject = [
 				'version': '1.0.0',
 			},
 		},
-		'path': `${ modulePath }/node_modules/@truecms/testmodule2`,
+		'path': modulePackage( '@truecms', 'testmodule2' ),
 		'peerDependencies': {
 			'@truecms/testmodule1': '^15.0.0',
 		},
@@ -80,7 +85,7 @@ const multipleOrgsResultObject = [
 				'version': '1.0.0',
 			},
 		},
-		'path': `${ multipleOrgsPath }/node_modules/@truecms/testmodule1`,
+		'path': multiOrgPackage( '@truecms', 'testmodule1' ),
 		'peerDependencies': {},
 		'version': '15.0.0',
 	},
@@ -102,7 +107,7 @@ const multipleOrgsResultObject = [
 				'version': '1.0.0',
 			},
 		},
-		'path': `${ multipleOrgsPath }/node_modules/@truecms/testmodule2`,
+		'path': multiOrgPackage( '@truecms', 'testmodule2' ),
 		'peerDependencies': {
 			'@truecms/testmodule1': '^15.0.0',
 		},
@@ -126,7 +131,7 @@ const multipleOrgsResultObject = [
 				'version': '1.0.0',
 			},
 		},
-		'path': `${ multipleOrgsPath }/node_modules/@nsw.gov.au/testmodule3`,
+		'path': multiOrgPackage( '@nsw.gov.au', 'testmodule3' ),
 		'peerDependencies': {
 			'@truecms/testmodule1': '^15.0.0',
 		},
@@ -172,7 +177,7 @@ test('GetModules should return nothing if no modules are found', () => {
 /**
  * Test that correct object is returned when package.json is parsed
  */
-const testPath = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule1`);
+const testPath = modulePackage( '@truecms', 'testmodule1' );
 
 const resultObject = {
 	'name': '@truecms/testmodule1',

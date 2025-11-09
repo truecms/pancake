@@ -10,6 +10,8 @@
 const { GetFolders, ReadFile, CreateDir } = require( '../src/files' );
 const Path = require( 'path' );
 
+const normaliseLineEndings = value => value.replace( /\r\n/g, '\n' );
+
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Get all folders inside a folder
@@ -71,7 +73,7 @@ const data = {
 const content = `${ JSON.stringify( data, null, '\t' ) }\n`;
 
 test('ReadFile should return correct information', () => {
-	return ReadFile( location ).then( data => {
-		expect( data ).toBe( content );
+	return ReadFile( location ).then( fileContent => {
+		expect( normaliseLineEndings( fileContent ) ).toBe( normaliseLineEndings( content ) );
 	});
 });

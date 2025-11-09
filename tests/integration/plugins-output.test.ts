@@ -154,7 +154,7 @@ describe( 'plugin output regression', () => {
 						readFile( join( tempBaseline, relativePath ), 'utf8' ),
 						readFile( join( actualDir, relativePath ), 'utf8' ),
 					] );
-					const expectedContent = normaliseQuotes( expectedRaw.trim() );
+					const expectedContent = prepareExpectedContent( expectedRaw );
 					const actualContent = normaliseContent( actualContentRaw, tempScenario, scenario.sourceDir );
 
 					expect( actualContent, `Mismatch in ${ scenario.name }: ${ relativePath }` ).toBe( expectedContent );
@@ -171,12 +171,16 @@ describe( 'plugin output regression', () => {
 const escapeForRegExp = ( value: string ) => value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
 
 const normaliseQuotes = ( value: string ) => value.replace( /"/g, '\'' );
+const normaliseLineEndings = ( value: string ) => value.replace( /\r\n/g, '\n' );
+const prepareExpectedContent = ( value: string ) => normaliseQuotes( normaliseLineEndings( value ).trim() );
 
 const normaliseContent = ( content: string, scenarioPath: string, sourceDir: string ) => {
 	const scenarioPattern = new RegExp( escapeForRegExp( scenarioPath ), 'g' );
 	return normaliseQuotes(
-		content
-			.replace( scenarioPattern, sourceDir )
+		normaliseLineEndings(
+			content
+				.replace( scenarioPattern, sourceDir )
+		)
 	)
 	.trim();
 };
