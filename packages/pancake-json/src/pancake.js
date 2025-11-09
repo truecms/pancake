@@ -35,20 +35,27 @@ const buildManifestPath = ( modulePath, cwd ) => {
 	const relativePath = Path.relative( cwd, modulePath );
 
 	if( relativePath === '' ) {
-		return cwd;
+		return trimTrailingSeparators( cwd );
 	}
 
-	if(
+	const isChildPath =
 		relativePath.length > 0 &&
 		!relativePath.startsWith( '..' ) &&
-		!Path.isAbsolute( relativePath )
-	) {
-		const posixRelative = relativePath.split( Path.sep ).join( '/' );
-		return `${ cwd }/${ posixRelative }`;
+		!Path.isAbsolute( relativePath );
+
+	if( isChildPath ) {
+		const trimmedCwd = trimTrailingSeparators( cwd );
+		const sanitizedRelative = relativePath
+			.replace( /\\/g, '/' )
+			.replace( /^\/+/, '' );
+
+		return `${ trimmedCwd }/${ sanitizedRelative }`;
 	}
 
 	return modulePath;
 };
+
+const trimTrailingSeparators = value => value.replace( /[\\/]+$/, '' ) || value;
 
 const getPackageVersion = ( name, basePaths ) => {
 	for( const basePath of basePaths ) {
