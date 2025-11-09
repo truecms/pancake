@@ -154,8 +154,9 @@ describe( 'plugin output regression', () => {
 						readFile( join( tempBaseline, relativePath ), 'utf8' ),
 						readFile( join( actualDir, relativePath ), 'utf8' ),
 					] );
-					const expectedContent = prepareExpectedContent( expectedRaw );
-					const actualContent = normaliseContent( actualContentRaw, tempScenario, scenario.sourceDir );
+					const compareOpts = shouldCollapseEscapedBackslashes( relativePath ) ? { unescapeBackslashes: true } : undefined;
+					const expectedContent = prepareExpectedContent( expectedRaw, compareOpts );
+					const actualContent = normaliseContent( actualContentRaw, tempScenario, scenario.sourceDir, compareOpts );
 
 					expect( actualContent, `Mismatch in ${ scenario.name }: ${ relativePath }` ).toBe( expectedContent );
 				}
@@ -172,15 +173,51 @@ const escapeForRegExp = ( value: string ) => value.replace( /[.*+?^${}()|[\]\\]/
 
 const normaliseQuotes = ( value: string ) => value.replace( /"/g, '\'' );
 const normaliseLineEndings = ( value: string ) => value.replace( /\r\n/g, '\n' );
-const prepareExpectedContent = ( value: string ) => normaliseQuotes( normaliseLineEndings( value ).trim() );
 
-const normaliseContent = ( content: string, scenarioPath: string, sourceDir: string ) => {
-	const scenarioPattern = new RegExp( escapeForRegExp( scenarioPath ), 'g' );
-	return normaliseQuotes(
-		normaliseLineEndings(
-			content
-				.replace( scenarioPattern, sourceDir )
-		)
-	)
-	.trim();
+const prepareExpectedContent = ( value: string, opts?: ContentOptions ) => {
+	return applyContentOptions(
+		normaliseQuotes( normaliseLineEndings( value ).trim() ),
+		opts
+	);
+};
+
+const normaliseContent = ( content: string, scenarioPath: string, sourceDir: string, opts?: ContentOptions ) => {
+	const replaced = replaceScenarioPaths( content, scenarioPath, sourceDir );
+	return applyContentOptions(
+		normaliseQuotes( normaliseLineEndings( replaced ).trim() ),
+		opts
+	);
+};
+
+type ContentOptions = {
+	unescapeBackslashes?: boolean;
+};
+
+const shouldCollapseEscapedBackslashes = ( relativePath: string ) => relativePath.endsWith( '.json' );
+
+const applyContentOptions = ( value: string, opts?: ContentOptions ) => {
+	if( opts?.unescapeBackslashes ) {
+		return collapseEscapedBackslashes( value );
+	}
+
+	return value;
+};
+
+const collapseEscapedBackslashes = ( value: string ) => value.replace( /\\(?![\\])/g, '\\' ).replace( /\\\\/g, '\\' );
+
+const replaceScenarioPaths = ( value: string, scenarioPath: string, sourceDir: string ) => {
+	let output = replaceAll( value, scenarioPath, sourceDir );
+	const escapedScenario = scenarioPath.replace( /\\/g, '\\\\' );
+	if( escapedScenario !== scenarioPath ) {
+		const escapedSource = sourceDir.replace( /\\/g, '\\\\' );
+		output = replaceAll( output, escapedScenario, escapedSource );
+	}
+	return output;
+};
+
+const replaceAll = ( value: string, needle: string, replacement: string ) => {
+	if( needle.length === 0 ) {
+		return value;
+	}
+	return value.replace( new RegExp( escapeForRegExp( needle ), 'g' ), replacement );
 };
