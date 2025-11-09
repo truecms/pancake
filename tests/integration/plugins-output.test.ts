@@ -154,7 +154,7 @@ describe( 'plugin output regression', () => {
 						readFile( join( tempBaseline, relativePath ), 'utf8' ),
 						readFile( join( actualDir, relativePath ), 'utf8' ),
 					] );
-					const compareOpts = shouldCollapseEscapedBackslashes( relativePath ) ? { unescapeBackslashes: true } : undefined;
+					const compareOpts = getContentOptions( relativePath );
 					const expectedContent = prepareExpectedContent( expectedRaw, compareOpts );
 					const actualContent = normaliseContent( actualContentRaw, tempScenario, scenario.sourceDir, compareOpts );
 
@@ -191,19 +191,37 @@ const normaliseContent = ( content: string, scenarioPath: string, sourceDir: str
 
 type ContentOptions = {
 	unescapeBackslashes?: boolean;
+	normalisePathSeparators?: boolean;
 };
 
-const shouldCollapseEscapedBackslashes = ( relativePath: string ) => relativePath.endsWith( '.json' );
-
-const applyContentOptions = ( value: string, opts?: ContentOptions ) => {
-	if( opts?.unescapeBackslashes ) {
-		return collapseEscapedBackslashes( value );
+const getContentOptions = ( relativePath: string ): ContentOptions | undefined => {
+	if( relativePath.endsWith( '.json' ) ) {
+		return {
+			unescapeBackslashes: true,
+			normalisePathSeparators: true,
+		};
 	}
 
-	return value;
+	return undefined;
+};
+
+const applyContentOptions = ( value: string, opts?: ContentOptions ) => {
+	let output = value;
+
+	if( opts?.unescapeBackslashes ) {
+		output = collapseEscapedBackslashes( output );
+	}
+
+	if( opts?.normalisePathSeparators ) {
+		output = normalisePathSeparators( output );
+	}
+
+	return output;
 };
 
 const collapseEscapedBackslashes = ( value: string ) => value.replace( /\\(?![\\])/g, '\\' ).replace( /\\\\/g, '\\' );
+
+const normalisePathSeparators = ( value: string ) => value.replace( /\\/g, '/' );
 
 const replaceScenarioPaths = ( value: string, scenarioPath: string, sourceDir: string ) => {
 	let output = replaceAll( value, scenarioPath, sourceDir );
