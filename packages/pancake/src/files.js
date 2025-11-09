@@ -43,7 +43,8 @@ module.exports.GetFolders = thisPath => {
 			.filter(
 				thisFile => Fs.statSync( Path.normalize(`${ thisPath }/${ thisFile }`) ).isDirectory() //only return directories
 			)
-			.map( path => Path.normalize(`${ thisPath }/${ path }`) );                               //return with path
+			.map( path => Path.normalize(`${ thisPath }/${ path }`) )                                //return with path
+			.sort( ( a, b ) => a.localeCompare( b ) );                                                //ensure deterministic order across platforms
 	}
 	catch( error ) {
 		Log.verbose(`${ Style.yellow( thisPath ) } not found`);
