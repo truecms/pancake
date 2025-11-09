@@ -101,6 +101,30 @@ const resolveBrowserslist = settings => {
 };
 
 
+const dedupeBannerPlugin = () => {
+	return {
+		postcssPlugin: 'pancake-dedupe-banner',
+		Once( root ) {
+			let seenBanner = false;
+			root.walkComments( comment => {
+				const text = comment.text || '';
+				if( !text.startsWith('! PANCAKE v') ) {
+					return;
+				}
+
+				if( seenBanner ) {
+					comment.remove();
+				}
+				else {
+					seenBanner = true;
+				}
+			} );
+		},
+	};
+};
+dedupeBannerPlugin.postcss = true;
+
+
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Default export
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -306,7 +330,10 @@ module.exports.Sassify = async ( location, settings, sass, cwd ) => {
 		const autoprefixerPlugin = browserslist
 			? Autoprefixer({ overrideBrowserslist: browserslist })
 			: Autoprefixer();
-		const prefixed = await Postcss([ autoprefixerPlugin ]).process( generated.css, postcssOptions );
+		const prefixed = await Postcss([
+			autoprefixerPlugin,
+			dedupeBannerPlugin(),
+		]).process( generated.css, postcssOptions );
 
 		prefixed
 			.warnings()
