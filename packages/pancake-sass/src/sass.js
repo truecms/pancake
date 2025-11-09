@@ -27,6 +27,27 @@ const { pathToFileURL, fileURLToPath } = require( 'url' );
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const { Log, Style, WriteFile } = require( '@truecms/pancake' );
 
+const escapeForRegExp = value => value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+
+const dedupeBannerComment = ( css, bannerComment ) => {
+        if( typeof bannerComment !== 'string' || bannerComment.trim().length === 0 ) {
+                return css;
+        }
+
+        const trimmed = bannerComment.trim();
+        if( trimmed.length === 0 ) {
+                return css;
+        }
+
+        const pattern = new RegExp( escapeForRegExp( trimmed ), 'g' );
+        let matchIndex = 0;
+        return css.replace( pattern, match => {
+                const replacement = ( matchIndex === 0 ) ? match : '';
+                matchIndex += 1;
+                return replacement;
+        } );
+};
+
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Sass helpers
@@ -314,7 +335,9 @@ module.exports.Sassify = async ( location, settings, sass, cwd ) => {
 
 		Log.verbose(`Sass: Successfully autoprefixed CSS for ${ Style.yellow( location ) }`);
 
-		await WriteFile( location, prefixed.css );
+                const outputCss = dedupeBannerComment( prefixed.css, settings && settings.bannerComment );
+
+                await WriteFile( location, outputCss );
 
 		if( shouldWriteSourceMap && prefixed.map ) {
 			const mapLocation = `${ location }.map`;
