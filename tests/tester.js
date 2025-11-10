@@ -214,6 +214,7 @@ const TESTER = (() => { //constructor factory
 						.delete( scriptFolder, unit )                                   //delete trash first
 						.then( () => TESTER.copyFixtures( scriptFolder, unit ) )        //copy fixtures
 						.then( () => TESTER.replaceFixtures( scriptFolder, unit ) )     //compile fixtures
+						.then( () => TESTER.normalizeFixtures( scriptFolder, unit ) )   //normalise line endings so hashes match on Windows
 						.then( () => TESTER.run( scriptFolder, unit ) )                 //now run script
 						.then( () => TESTER.fixture( scriptFolder, unit ) )             //get hash for fixture
 						.then( result => TESTER.result( scriptFolder, unit, result ) )  //get hash for result of test
@@ -250,6 +251,41 @@ const TESTER = (() => { //constructor factory
 					}
 			});
 
+		},
+
+
+		/**
+		 * Ensure fixture files use LF endings so git autocrlf on Windows does not
+		 * alter the content that Dirsum hashes.
+		 *
+		 * @param  {string} path     - The path to the test folder
+		 * @param  {object} settings - The settings object for this test
+		 *
+		 * @return {Promise object}
+		 */
+		normalizeFixtures: ( path, settings ) => {
+			return new Promise( ( resolve, reject ) => {
+				if( settings.empty ) {
+					resolve();
+					return;
+				}
+
+				Replace({
+					files: [
+						Path.normalize(`${ path }/_fixture/**`),
+					],
+					from: [
+						/\r\n/g,
+					],
+					to: [
+						'\n',
+					],
+					allowEmptyPaths: true,
+					encoding: 'utf8',
+				})
+					.then( () => resolve() )
+					.catch( error => reject( error ) );
+			});
 		},
 
 
