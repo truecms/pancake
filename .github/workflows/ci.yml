@@ -36,13 +36,18 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           set -euo pipefail
+          # Ensure origin uses HTTPS so it works in both GitHub and act without SSH keys
+          if git remote get-url origin >/dev/null 2>&1; then
+            git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git" || true
+          fi
           base_branch=$(node -p "(require('./.changeset/config.json').baseBranch) || 'master'")
           if [ -z "$base_branch" ]; then
             echo 'Unable to determine base branch for Changesets'
             exit 1
           fi
 
-          if git rev-parse --is-shallow-repository >/dev/null 2>&1 && git rev-parse --is-shallow-repository; then
+          # Detect shallow clone correctly; git prints 'true'/'false' but exits 0 either way
+          if git rev-parse --is-shallow-repository >/dev/null 2>&1 && [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
             git fetch --no-tags origin "$base_branch" --prune --unshallow
           else
             git fetch --no-tags origin "$base_branch" --prune
