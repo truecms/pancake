@@ -32,6 +32,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Fetch base branch for Changesets
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          # Ensure origin uses HTTPS so it works in both GitHub and act without SSH keys
+          if git remote get-url origin >/dev/null 2>&1; then
+            git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git" || true
+          fi
+          base_branch=$(node -p "(require('./.changeset/config.json').baseBranch) || 'master'")
+          if [ -z "$base_branch" ]; then
+            echo 'Unable to determine base branch for Changesets'
+            exit 1
+          fi
+
+          # Detect shallow clone correctly; git prints 'true'/'false' but exits 0 either way
+          if git rev-parse --is-shallow-repository >/dev/null 2>&1 && [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+            git fetch --no-tags origin "$base_branch" --prune --unshallow
+          else
+            git fetch --no-tags origin "$base_branch" --prune
+          fi
+
+          git branch --force "$base_branch" "origin/$base_branch"
+
       - name: Set up Node.js 22
         uses: actions/setup-node@v4
         with:
@@ -48,10 +71,7 @@ jobs:
       - name: Run lint script (if present)
         id: lint
         run: |
-          if node - <<'EOF'
-const pkg = require('./package.json');
-process.exit(pkg.scripts && pkg.scripts.lint ? 0 : 1);
-EOF
+          if node -e 'const pkg = require("./package.json"); if (!(pkg.scripts && pkg.scripts.lint)) { process.exit(1); }'
           then
             pnpm run lint
             if [ -n "${GITHUB_OUTPUT:-}" ]; then
@@ -102,6 +122,9 @@ EOF
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build workspaces
+        run: pnpm run build
+
       - name: Run unit tests
         run: pnpm run test:unit-test
 
@@ -130,6 +153,9 @@ EOF
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build workspaces
+        run: pnpm run build
 
       - name: Run fixture regression suite
         id: fixtures

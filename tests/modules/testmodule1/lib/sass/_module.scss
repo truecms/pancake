@@ -2,10 +2,9 @@
 // Core module
 //
 // Content:
-// - sass-versioning
 // - globals
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-@import '_globals.scss';
-@import '_print.scss';
+@use '_globals.scss' as *;
+@use '_print.scss' as *;

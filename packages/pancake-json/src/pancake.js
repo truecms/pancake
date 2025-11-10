@@ -27,6 +27,36 @@ const { Log, Style, Loading, ReadFile, WriteFile } = require( '@truecms/pancake'
 
 const SCHEMA_VERSION = '1.0.0';
 
+const buildManifestPath = ( modulePath, cwd ) => {
+	if( typeof modulePath !== 'string' || typeof cwd !== 'string' || cwd.length === 0 ) {
+		return modulePath;
+	}
+
+	const relativePath = Path.relative( cwd, modulePath );
+
+	if( relativePath === '' ) {
+		return trimTrailingSeparators( cwd );
+	}
+
+	const isChildPath =
+		relativePath.length > 0 &&
+		!relativePath.startsWith( '..' ) &&
+		!Path.isAbsolute( relativePath );
+
+	if( isChildPath ) {
+		const trimmedCwd = trimTrailingSeparators( cwd );
+		const sanitizedRelative = relativePath
+			.replace( /\\/g, '/' )
+			.replace( /^\/+/, '' );
+
+		return `${ trimmedCwd }/${ sanitizedRelative }`;
+	}
+
+	return modulePath;
+};
+
+const trimTrailingSeparators = value => value.replace( /[\\/]+$/, '' ) || value;
+
 const getPackageVersion = ( name, basePaths ) => {
 	for( const basePath of basePaths ) {
 		try {
@@ -162,7 +192,7 @@ module.exports.pancake = ( version, modules, settings, GlobalSettings, cwd ) => 
 				}
 
 				if( SETTINGS.json.content.path ) {
-					JSONOutput[ modulePackage.name ].path = modulePackage.path;
+					JSONOutput[ modulePackage.name ].path = buildManifestPath( modulePackage.path, cwd );
 				}
 
 				if( SETTINGS.json.content.settings ) {

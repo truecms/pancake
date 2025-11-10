@@ -22,7 +22,7 @@ process.env.PANCAKE_SASS_SILENCE_DEPRECATIONS = '1';
 const modules = [
 	{
 		'name': '@truecms/testmodule1',
-		'version': '11.0.1',
+		'version': '15.0.0',
 		'peerDependencies': {},
 		'pancake': {
 			'pancake-module': {
@@ -30,10 +30,10 @@ const modules = [
 				'plugins': [
 					'@truecms/pancake-sass',
 					'@truecms/pancake-js',
+					'@truecms/pancake-json',
 				],
 				'sass': {
 					'path': 'lib/sass/_module.scss',
-					'sass-versioning': true,
 				},
 				'js': {
 					'path': 'lib/js/module.js',
@@ -44,34 +44,36 @@ const modules = [
 	},
 	{
 		'name': '@truecms/testmodule2',
-		'version': '13.0.0',
+		'version': '19.0.0',
 		'peerDependencies': {
-			'@truecms/testmodule1': '^11.0.1',
-			},
-			'pancake': {
-				'pancake-module': {
-					'version': '1.0.0',
-					'plugins': [
-						'@truecms/pancake-sass',
-						'@truecms/pancake-js',
-					],
-					'sass': {
-						'path': 'lib/sass/_module.scss',
-						'sass-versioning': true,
-					},
-					'js': {
-						'path': 'lib/js/module.js',
-					},
+			'@truecms/testmodule1': '^15.0.0',
+		},
+		'pancake': {
+			'pancake-module': {
+				'version': '1.0.0',
+				'plugins': [
+					'@truecms/pancake-sass',
+					'@truecms/pancake-js',
+					'@truecms/pancake-json',
+				],
+				'sass': {
+					'path': 'lib/sass/_module.scss',
+				},
+				'js': {
+					'path': 'lib/js/module.js',
 				},
 			},
-			'path': `${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2`,
 		},
+		'path': `${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2`,
+	},
 ];
 
 const moduleName = '@truecms/testmodule2';
 const baseLocation = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/`);
 const npmOrg = '@truecms';
-const resultPath = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2/lib/sass/_module.scss`);
+const absoluteModule1Path = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule1/lib/sass/_module.scss`);
+const absoluteModule2Path = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2/lib/sass/_module.scss`);
+const resultPath = absoluteModule2Path;
 
 test('GetPath should return path for sass partial', () => {
 	expect( GetPath( moduleName, modules, baseLocation, npmOrg ) ).toBe( resultPath );
@@ -87,7 +89,7 @@ test('GetPath should return path for sass partial with multiple orgs', () => {
 // GetDependencies function
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 const ResultDependencies = {
-	'@truecms/testmodule1': '^11.0.1',
+	'@truecms/testmodule1': '^15.0.0',
 };
 
 test('GetDependencies should return object of all dependencies', () => {
@@ -98,10 +100,9 @@ test('GetDependencies should return object of all dependencies', () => {
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
 // GenerateSass function
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------
-const sassPath = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/`);
-
-const ResultGenerateSass = `@use "${ sassPath }@truecms/testmodule1/lib/sass/_module.scss" as *;\n` +
-	`@use "${ sassPath }@truecms/testmodule2/lib/sass/_module.scss" as *;\n`;
+const escapePath = path => path.replace(/\\/g, '\\\\');
+const ResultGenerateSass = `@use "${ escapePath( absoluteModule1Path ) }" as *;\n` +
+	`@use "${ escapePath( absoluteModule2Path ) }" as *;\n`;
 
 const Location = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule2`);
 
@@ -137,13 +138,13 @@ const settings = {
 };
 
 const sass = `/*! PANCAKE v${ pancakeVersion } PANCAKE-SASS v${ pancakeSassVersion } */\n\n` +
-	`@import "${ sassPath }sass-versioning/dist/_index.scss";\n\n` +
-	`@import "${ sassPath }@truecms/testmodule1/lib/sass/_module.scss";\n` +
-	`@import "${ sassPath }@truecms/testmodule2/lib/sass/_module.scss";\n\n` +
-	`@include versioning-check();\n`;
+	`@use "${ escapePath( absoluteModule1Path ) }" as *;\n` +
+	`@use "${ escapePath( absoluteModule2Path ) }" as *;\n`;
+
+const testCwd = Path.normalize(`${ __dirname }/../../../tests/test1`);
 
 test('Sassify should resolve promise', () => {
-	return Sassify( cssLocation, settings, sass ).then( data => {
+	return Sassify( cssLocation, settings, sass, testCwd ).then( data => {
 		expect( data ).toBe( true );
 	});
 });
@@ -154,7 +155,7 @@ test('Sassify should write sourcemap when enabled', async () => {
 	const sourcemapSettings = Object.assign( {}, settings, { sourcemap: true } );
 
 	try {
-		await Sassify( tempCssLocation, sourcemapSettings, sass );
+		await Sassify( tempCssLocation, sourcemapSettings, sass, testCwd );
 		expect( Fs.existsSync( `${ tempCssLocation }.map` ) ).toBe( true );
 	}
 	finally {

@@ -43,7 +43,8 @@ module.exports.GetFolders = thisPath => {
 			.filter(
 				thisFile => Fs.statSync( Path.normalize(`${ thisPath }/${ thisFile }`) ).isDirectory() //only return directories
 			)
-			.map( path => Path.normalize(`${ thisPath }/${ path }`) );                               //return with path
+			.map( path => Path.normalize(`${ thisPath }/${ path }`) )                                //return with path
+			.sort( ( a, b ) => a.localeCompare( b ) );                                                //ensure deterministic order across platforms
 	}
 	catch( error ) {
 		Log.verbose(`${ Style.yellow( thisPath ) } not found`);
@@ -64,45 +65,20 @@ module.exports.GetFolders = thisPath => {
  *
  * @return {string}           - The path that was just worked at
  */
-const CreateDir = ( dir ) => {
-	Log.verbose(`Creating path ${ Style.yellow( dir ) }`);
+const CreateDir = dir => {
+	const target = Path.resolve( dir );
+	Log.verbose(`Ensuring path ${ Style.yellow( target ) } exists`);
 
-	const splitPath = dir.split( Path.sep );
+	try {
+		Fs.mkdirSync( target, { recursive: true } );
+	}
+	catch( error ) {
+		Log.error(`Pancake was unable to create the folder ${ Style.yellow( target ) } for path ${ Style.yellow( dir ) }`);
+		Log.error( error );
+		process.exit( 1 );
+	}
 
-	splitPath.reduce( ( path, subPath ) => {
-		let currentPath;
-
-		if( /^win/.test( process.platform ) && path === '' ) { // when using windows (post truth) at beginning of the path
-			path = './';                                         // we add the prefix to make sure it works on windows (yuck)
-		}
-
-		if( subPath != '.' ) {
-			currentPath = Path.normalize(`${ path }/${ subPath }`);
-
-			Log.verbose(`Checking if ${ Style.yellow( currentPath ) } exists`)
-
-			if( !Fs.existsSync( currentPath ) ) {
-				try {
-					Fs.mkdirSync( currentPath );
-
-					Log.verbose(`Successfully ${ Style.yellow( currentPath ) } created`)
-				}
-				catch( error ) {
-					Log.error(`Pancake was unable to create the folder ${ Style.yellow( currentPath ) } for path ${ Style.yellow( dir ) }`);
-					Log.error( error );
-
-					process.exit( 1 );
-				}
-			}
-		}
-		else {
-			currentPath = subPath;
-		}
-
-		return currentPath;
-	}, '');
-
-	return splitPath.join( Path.sep );
+	return target;
 };
 
 

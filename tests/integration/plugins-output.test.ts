@@ -134,7 +134,7 @@ const assertDirectoryExists = async ( directory: string ) => {
 
 describe( 'plugin output regression', () => {
 	for( const scenario of scenarios ) {
-		test( `matches baseline for ${ scenario.name }`, async () => {
+		test( `matches baseline for ${ scenario.name }`, { timeout: 120_000 }, async () => {
 			const tempScenario = await prepareScenario( scenario.sourceDir );
 			const tempBaseline = await prepareBaseline( scenario.baselineDir );
 
@@ -154,8 +154,9 @@ describe( 'plugin output regression', () => {
 						readFile( join( tempBaseline, relativePath ), 'utf8' ),
 						readFile( join( actualDir, relativePath ), 'utf8' ),
 					] );
-					const expectedContent = normaliseQuotes( expectedRaw.trim() );
-					const actualContent = normaliseContent( actualContentRaw, tempScenario, scenario.sourceDir );
+					const compareOpts = getContentOptions( relativePath );
+					const expectedContent = prepareExpectedContent( expectedRaw, compareOpts );
+					const actualContent = normaliseContent( actualContentRaw, tempScenario, scenario.sourceDir, compareOpts );
 
 					expect( actualContent, `Mismatch in ${ scenario.name }: ${ relativePath }` ).toBe( expectedContent );
 				}
@@ -164,19 +165,77 @@ describe( 'plugin output regression', () => {
 				await rm( tempScenario, { recursive: true, force: true } );
 				await rm( tempBaseline, { recursive: true, force: true } );
 			}
-		}, { timeout: 120_000 } );
+		} );
 	}
 } );
 
 const escapeForRegExp = ( value: string ) => value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
 
 const normaliseQuotes = ( value: string ) => value.replace( /"/g, '\'' );
+const normaliseLineEndings = ( value: string ) => value.replace( /\r\n/g, '\n' );
 
-const normaliseContent = ( content: string, scenarioPath: string, sourceDir: string ) => {
-	const scenarioPattern = new RegExp( escapeForRegExp( scenarioPath ), 'g' );
-	return normaliseQuotes(
-		content
-			.replace( scenarioPattern, sourceDir )
-	)
-	.trim();
+const prepareExpectedContent = ( value: string, opts?: ContentOptions ) => {
+	return applyContentOptions(
+		normaliseQuotes( normaliseLineEndings( value ).trim() ),
+		opts
+	);
+};
+
+const normaliseContent = ( content: string, scenarioPath: string, sourceDir: string, opts?: ContentOptions ) => {
+	const replaced = replaceScenarioPaths( content, scenarioPath, sourceDir );
+	return applyContentOptions(
+		normaliseQuotes( normaliseLineEndings( replaced ).trim() ),
+		opts
+	);
+};
+
+type ContentOptions = {
+	unescapeBackslashes?: boolean;
+	normalisePathSeparators?: boolean;
+};
+
+const getContentOptions = ( relativePath: string ): ContentOptions | undefined => {
+	if( relativePath.endsWith( '.json' ) ) {
+		return {
+			unescapeBackslashes: true,
+			normalisePathSeparators: true,
+		};
+	}
+
+	return undefined;
+};
+
+const applyContentOptions = ( value: string, opts?: ContentOptions ) => {
+	let output = value;
+
+	if( opts?.unescapeBackslashes ) {
+		output = collapseEscapedBackslashes( output );
+	}
+
+	if( opts?.normalisePathSeparators ) {
+		output = normalisePathSeparators( output );
+	}
+
+	return output;
+};
+
+const collapseEscapedBackslashes = ( value: string ) => value.replace( /\\(?![\\])/g, '\\' ).replace( /\\\\/g, '\\' );
+
+const normalisePathSeparators = ( value: string ) => value.replace( /\\/g, '/' );
+
+const replaceScenarioPaths = ( value: string, scenarioPath: string, sourceDir: string ) => {
+	let output = replaceAll( value, scenarioPath, sourceDir );
+	const escapedScenario = scenarioPath.replace( /\\/g, '\\\\' );
+	if( escapedScenario !== scenarioPath ) {
+		const escapedSource = sourceDir.replace( /\\/g, '\\\\' );
+		output = replaceAll( output, escapedScenario, escapedSource );
+	}
+	return output;
+};
+
+const replaceAll = ( value: string, needle: string, replacement: string ) => {
+	if( needle.length === 0 ) {
+		return value;
+	}
+	return value.replace( new RegExp( escapeForRegExp( needle ), 'g' ), replacement );
 };

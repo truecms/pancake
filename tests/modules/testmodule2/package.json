@@ -29,6 +29,7 @@
 		"pancake-module": {
 			"version": "1.0.0",
 			"plugins": [
+				"@truecms/pancake-sass",
 				"@truecms/pancake-js",
 				"@truecms/pancake-json"
 			],

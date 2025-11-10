@@ -18,7 +18,7 @@ concurrency:
 jobs:
   publish_snapshot:
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'develop' }}
-    name: Publish snapshot to npm (dist-tag: next)
+    name: 'Publish snapshot to npm (dist-tag: next)'
     runs-on: ubuntu-latest
 
     steps:
@@ -53,7 +53,7 @@ jobs:
             echo "has_changesets=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Create snapshot versions (dist: next)
+      - name: 'Create snapshot versions (dist: next)'
         if: steps.changesets.outputs.has_changesets == 'true'
         run: pnpm exec changeset version --snapshot next
 
@@ -76,5 +76,3 @@ jobs:
               echo "- Published snapshot with dist-tag 'next'" >> "$GITHUB_STEP_SUMMARY"
             fi
           fi
-
-
