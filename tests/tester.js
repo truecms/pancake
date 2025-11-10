@@ -214,8 +214,9 @@ const TESTER = (() => { //constructor factory
 						.delete( scriptFolder, unit )                                   //delete trash first
 						.then( () => TESTER.copyFixtures( scriptFolder, unit ) )        //copy fixtures
 						.then( () => TESTER.replaceFixtures( scriptFolder, unit ) )     //compile fixtures
-						.then( () => TESTER.normalizeFixtures( scriptFolder, unit ) )   //normalise line endings so hashes match on Windows
+						.then( () => TESTER.normalizeFixtures( scriptFolder, unit ) )   //normalise fixture line endings so hashes match on Windows
 						.then( () => TESTER.run( scriptFolder, unit ) )                 //now run script
+						.then( () => TESTER.normalizeResults( scriptFolder, unit ) )    //normalise output line endings before hashing
 						.then( () => TESTER.fixture( scriptFolder, unit ) )             //get hash for fixture
 						.then( result => TESTER.result( scriptFolder, unit, result ) )  //get hash for result of test
 						.then( result => TESTER.compare( unit, result ) )               //now compare both and detail errors
@@ -263,30 +264,46 @@ const TESTER = (() => { //constructor factory
 		 *
 		 * @return {Promise object}
 		 */
-		normalizeFixtures: ( path, settings ) => {
-			return new Promise( ( resolve, reject ) => {
-				if( settings.empty ) {
-					resolve();
-					return;
-				}
+			normalizeFixtures: ( path, settings ) => {
+				const targets = [
+					Path.normalize(`${ path }/_fixture/**`),
+				];
 
-				Replace({
-					files: [
-						Path.normalize(`${ path }/_fixture/**`),
-					],
-					from: [
-						/\r\n/g,
-					],
-					to: [
-						'\n',
-					],
-					allowEmptyPaths: true,
-					encoding: 'utf8',
-				})
-					.then( () => resolve() )
-					.catch( error => reject( error ) );
-			});
-		},
+				return TESTER.normalizeLineEndings( targets, settings );
+			},
+
+
+			normalizeResults: ( path, settings ) => {
+				const targets = [
+					Path.normalize(`${ path }/${ settings.compare }/**`),
+				];
+
+				return TESTER.normalizeLineEndings( targets, settings );
+			},
+
+
+			normalizeLineEndings: ( targets, settings ) => {
+				return new Promise( ( resolve, reject ) => {
+					if( settings.empty ) {
+						resolve();
+						return;
+					}
+
+					Replace({
+						files: targets,
+						from: [
+							/\r\n/g,
+						],
+						to: [
+							'\n',
+						],
+						allowEmptyPaths: true,
+						encoding: 'utf8',
+					})
+						.then( () => resolve() )
+						.catch( error => reject( error ) );
+				});
+			},
 
 
 		/**
