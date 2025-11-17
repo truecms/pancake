@@ -289,17 +289,53 @@ const TESTER = (() => { //constructor factory
 						return;
 					}
 
-					Replace({
-						files: targets,
-						from: [
-							/\r\n/g,
-						],
-						to: [
-							'\n',
-						],
-						allowEmptyPaths: true,
-						encoding: 'utf8',
-					})
+					// Normalise line endings first so CRLF/CR/LF mismatches do not affect hashes.
+					const jobs = [];
+
+					jobs.push(
+						Replace({
+							files: targets,
+							from: [
+								/\r\n/g,
+							],
+							to: [
+								'\n',
+							],
+							allowEmptyPaths: true,
+							encoding: 'utf8',
+						})
+					);
+
+					// Additionally normalise path representations for JSON + Sass outputs so that
+					// Windows-style backslashes and escaped backslashes do not cause cross-platform
+					// fixture hash differences. This mirrors the content normalisation used in the
+					// Vitest integration tests.
+					const pathTargets = [
+						// JSON fixtures and results
+						...targets.map( pattern => pattern.replace( /\*\*/g, '**/*.json' ) ),
+						// Sass fixtures and results
+						...targets.map( pattern => pattern.replace( /\*\*/g, '**/*.scss' ) ),
+					];
+
+					jobs.push(
+						Replace({
+							files: pathTargets,
+							from: [
+								/\\(?![\\])/g, // collapse single escaped backslashes
+								/\\\\/g,       // collapse double-escaped backslashes
+								/\\/g,         // finally normalise remaining separators to '/'
+							],
+							to: [
+								'\\',
+								'\\',
+								'/',
+							],
+							allowEmptyPaths: true,
+							encoding: 'utf8',
+						})
+					);
+
+					Promise.all( jobs )
 						.then( () => resolve() )
 						.catch( error => reject( error ) );
 				});
