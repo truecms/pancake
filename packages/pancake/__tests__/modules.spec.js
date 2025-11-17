@@ -20,52 +20,51 @@ const Path = require( 'path' );
 const modulePath = Path.normalize(`${ __dirname }/../../../tests/test1`);
 const multipleOrgsPath = Path.normalize(`${ __dirname }/../../../tests/test14`);
 
+const moduleFolder = scope => Path.join( modulePath, 'node_modules', scope );
+const multipleOrgFolder = scope => Path.join( multipleOrgsPath, 'node_modules', scope );
+const modulePackage = ( scope, pkg ) => Path.join( moduleFolder( scope ), pkg );
+const multiOrgPackage = ( scope, pkg ) => Path.join( multipleOrgFolder( scope ), pkg );
+
 const moduleResultObject = [
 	{
 		'name': '@truecms/testmodule1',
 		'pancake': {
 			'pancake-module': {
-				'js': {
-					'path': 'lib/js/module.js',
-				},
 				'plugins': [
 					'@truecms/pancake-sass',
 					'@truecms/pancake-js',
+					'@truecms/pancake-json',
 				],
 				'sass': {
 					'path': 'lib/sass/_module.scss',
-					'sass-versioning': true,
 				},
 				'version': '1.0.0',
 			},
 		},
-		'path': `${ modulePath }/node_modules/@truecms/testmodule1`,
+		'path': modulePackage( '@truecms', 'testmodule1' ),
 		'peerDependencies': {},
-		'version': '11.0.1',
+		'version': '15.0.0',
 	},
 	{
 		'name': '@truecms/testmodule2',
 		'pancake': {
 			'pancake-module': {
-				'js': {
-					'path': 'lib/js/module.js',
-				},
 				'plugins': [
 					'@truecms/pancake-sass',
 					'@truecms/pancake-js',
+					'@truecms/pancake-json',
 				],
 				'sass': {
 					'path': 'lib/sass/_module.scss',
-					'sass-versioning': true,
 				},
 				'version': '1.0.0',
 			},
 		},
-		'path': `${ modulePath }/node_modules/@truecms/testmodule2`,
+		'path': modulePackage( '@truecms', 'testmodule2' ),
 		'peerDependencies': {
-			'@truecms/testmodule1': '^11.0.1',
+			'@truecms/testmodule1': '^15.0.0',
 		},
-		'version': '13.0.0',
+		'version': '19.0.0',
 	},
 ];
 
@@ -75,47 +74,44 @@ const multipleOrgsResultObject = [
 		'name': '@truecms/testmodule1',
 		'pancake': {
 			'pancake-module': {
-				'js': {
-					'path': 'lib/js/module.js',
-				},
 				'plugins': [
 					'@truecms/pancake-sass',
 					'@truecms/pancake-js',
+					'@truecms/pancake-json',
 				],
 				'sass': {
 					'path': 'lib/sass/_module.scss',
-					'sass-versioning': true,
 				},
 				'version': '1.0.0',
 			},
 		},
-		'path': `${ multipleOrgsPath }/node_modules/@truecms/testmodule1`,
+		'path': multiOrgPackage( '@truecms', 'testmodule1' ),
 		'peerDependencies': {},
-		'version': '11.0.1',
+		'version': '15.0.0',
 	},
 	{
 		'name': '@truecms/testmodule2',
 		'pancake': {
 			'pancake-module': {
-				'js': {
-					'path': 'lib/js/module.js',
-				},
 				'plugins': [
 					'@truecms/pancake-sass',
 					'@truecms/pancake-js',
+					'@truecms/pancake-json',
 				],
 				'sass': {
 					'path': 'lib/sass/_module.scss',
-					'sass-versioning': true,
+				},
+				'sass': {
+					'path': 'lib/sass/_module.scss',
 				},
 				'version': '1.0.0',
 			},
 		},
-		'path': `${ multipleOrgsPath }/node_modules/@truecms/testmodule2`,
+		'path': multiOrgPackage( '@truecms', 'testmodule2' ),
 		'peerDependencies': {
-			'@truecms/testmodule1': '^11.0.1',
+			'@truecms/testmodule1': '^15.0.0',
 		},
-		'version': '13.0.0',
+		'version': '19.0.0',
 	},
 	{
 		'name': '@nsw.gov.au/testmodule3',
@@ -135,11 +131,11 @@ const multipleOrgsResultObject = [
 				'version': '1.0.0',
 			},
 		},
-		'path': `${ multipleOrgsPath }/node_modules/@nsw.gov.au/testmodule3`,
+		'path': multiOrgPackage( '@nsw.gov.au', 'testmodule3' ),
 		'peerDependencies': {
-			'@truecms/testmodule1': '^11.0.1',
+			'@truecms/testmodule1': '^15.0.0',
 		},
-		'version': '13.0.0',
+		'version': '19.0.0',
 	},
 ];
 
@@ -181,24 +177,24 @@ test('GetModules should return nothing if no modules are found', () => {
 /**
  * Test that correct object is returned when package.json is parsed
  */
-const testPath = Path.normalize(`${ __dirname }/../../../tests/test1/node_modules/@truecms/testmodule1`);
+const testPath = modulePackage( '@truecms', 'testmodule1' );
 
 const resultObject = {
 	'name': '@truecms/testmodule1',
-	'version':  '11.0.1',
+	'version':  '15.0.0',
 	'peerDependencies': {},
 	'pancake': {
 		'pancake-module': {
-		'js': {
-			'path': 'lib/js/module.js',
-		},
 		'plugins': [
 			'@truecms/pancake-sass',
 			'@truecms/pancake-js',
+			'@truecms/pancake-json',
 		],
 		'sass': {
 			'path': 'lib/sass/_module.scss',
-			'sass-versioning': true,
+		},
+		'js': {
+			'path': 'lib/js/module.js',
 		},
 		'version': '1.0.0',
 		}
@@ -235,7 +231,7 @@ test('ReadModule should return null if package.json is not found', () => {
 const allModules = [
 	{
 		'name': '@truecms/testmodule1',
-		'version': '11.0.1',
+		'version': '15.0.0',
 		'peerDependencies': {},
 		'pancake': {
 			'pancake-module':{
@@ -243,19 +239,24 @@ const allModules = [
 				'plugins':[
 					'@truecms/pancake-sass',
 					'@truecms/pancake-js',
+					'@truecms/pancake-json',
 				],
 			},
 		},
 	},
 	{
 		'name': '@truecms/testmodule2',
-		'version': '11.0.1',
-		'peerDependencies': {},
+		'version': '19.0.0',
+		'peerDependencies': {
+			'@truecms/testmodule1': '^15.0.0',
+		},
 		'pancake': {
 			'pancake-module':{
 				'version':'1.0.0',
 				'plugins':[
-					'@truecms/pancake-svg',
+					'@truecms/pancake-sass',
+					'@truecms/pancake-js',
+					'@truecms/pancake-json',
 				],
 			},
 		},
@@ -265,7 +266,7 @@ const allModules = [
 const result = [
 	'@truecms/pancake-sass',
 	'@truecms/pancake-js',
-	'@truecms/pancake-svg',
+	'@truecms/pancake-json',
 ];
 
 test('GetPlugins should return array of all plugins', () => {

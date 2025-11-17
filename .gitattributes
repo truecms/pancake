@@ -1,0 +1,7 @@
+* text=auto
+
+# Keep committed fixtures consistent across platforms so dirsum comparisons
+# produce the same hashes on Windows runners.
+tests/test*/fixture/** text eol=lf
+tests/test*/node_modules/** text eol=lf
+tests/baseline/** text eol=lf

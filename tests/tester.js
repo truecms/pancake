@@ -214,7 +214,9 @@ const TESTER = (() => { //constructor factory
 						.delete( scriptFolder, unit )                                   //delete trash first
 						.then( () => TESTER.copyFixtures( scriptFolder, unit ) )        //copy fixtures
 						.then( () => TESTER.replaceFixtures( scriptFolder, unit ) )     //compile fixtures
+						.then( () => TESTER.normalizeFixtures( scriptFolder, unit ) )   //normalise fixture line endings so hashes match on Windows
 						.then( () => TESTER.run( scriptFolder, unit ) )                 //now run script
+						.then( () => TESTER.normalizeResults( scriptFolder, unit ) )    //normalise output line endings before hashing
 						.then( () => TESTER.fixture( scriptFolder, unit ) )             //get hash for fixture
 						.then( result => TESTER.result( scriptFolder, unit, result ) )  //get hash for result of test
 						.then( result => TESTER.compare( unit, result ) )               //now compare both and detail errors
@@ -223,7 +225,10 @@ const TESTER = (() => { //constructor factory
 								TESTER.delete( scriptFolder, unit );
 							}
 						})
-						.catch( error => TESTER.log.error(`Nooo: ${ error }`) )         //catch errors...
+						.catch( error => {
+							TESTER.PASS = false;
+							TESTER.log.error(`Nooo: ${ unit.name }: ${ error }`);
+						})         //catch errors...
 				);
 			}
 
@@ -248,6 +253,93 @@ const TESTER = (() => { //constructor factory
 			});
 
 		},
+
+
+		/**
+		 * Ensure fixture files use LF endings so git autocrlf on Windows does not
+		 * alter the content that Dirsum hashes.
+		 *
+		 * @param  {string} path     - The path to the test folder
+		 * @param  {object} settings - The settings object for this test
+		 *
+		 * @return {Promise object}
+		 */
+			normalizeFixtures: ( path, settings ) => {
+				const targets = [
+					Path.normalize(`${ path }/_fixture/**`),
+				];
+
+				return TESTER.normalizeLineEndings( targets, settings );
+			},
+
+
+			normalizeResults: ( path, settings ) => {
+				const targets = [
+					Path.normalize(`${ path }/${ settings.compare }/**`),
+				];
+
+				return TESTER.normalizeLineEndings( targets, settings );
+			},
+
+
+			normalizeLineEndings: ( targets, settings ) => {
+				return new Promise( ( resolve, reject ) => {
+					if( settings.empty ) {
+						resolve();
+						return;
+					}
+
+					// Normalise line endings first so CRLF/CR/LF mismatches do not affect hashes.
+					const jobs = [];
+
+					jobs.push(
+						Replace({
+							files: targets,
+							from: [
+								/\r\n/g,
+							],
+							to: [
+								'\n',
+							],
+							allowEmptyPaths: true,
+							encoding: 'utf8',
+						})
+					);
+
+					// Additionally normalise path representations for JSON + Sass outputs so that
+					// Windows-style backslashes and escaped backslashes do not cause cross-platform
+					// fixture hash differences. This mirrors the content normalisation used in the
+					// Vitest integration tests.
+					const pathTargets = [
+						// JSON fixtures and results
+						...targets.map( pattern => pattern.replace( /\*\*/g, '**/*.json' ) ),
+						// Sass fixtures and results
+						...targets.map( pattern => pattern.replace( /\*\*/g, '**/*.scss' ) ),
+					];
+
+					jobs.push(
+						Replace({
+							files: pathTargets,
+							from: [
+								/\\(?![\\])/g, // collapse single escaped backslashes
+								/\\\\/g,       // collapse double-escaped backslashes
+								/\\/g,         // finally normalise remaining separators to '/'
+							],
+							to: [
+								'\\',
+								'\\',
+								'/',
+							],
+							allowEmptyPaths: true,
+							encoding: 'utf8',
+						})
+					);
+
+					Promise.all( jobs )
+						.then( () => resolve() )
+						.catch( error => reject( error ) );
+				});
+			},
 
 
 		/**
